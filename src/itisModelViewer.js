@@ -1,19 +1,20 @@
 const THREE=require('three');
-import { GLTFLoader } from '../node_modules/three/examples/jsm/loaders/GLTFLoader.js';
+import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
+import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
+
 import {enableMouseDrag,addEvents} from './eventUtils.js';
 const EventEmitter = require('events');
 class itisModelViewer extends EventEmitter{
 	_vars(){
 		this.opts=null;//save the options
 		this.renderer=null;
-		/* this.moveScene=null;
-		this.rotateScene=null; */
 		this.clock=new THREE.Clock();//clock for animation
 		this.animationMixerList=null;
 		this.defaultCamera=null;//for view of scene's transform
 		this.defaultScene=null;//loaded when no url specified
 		this.currentCamera=null;//current using camera
 		this.currentScene=null;//current using scene
+		this.controls=null;
 	}
 	get width(){return this.opts.width;}
 	set width(v){this.opts.width=v;}
@@ -45,6 +46,7 @@ class itisModelViewer extends EventEmitter{
 			this.initDefaultScene();
 		}
 		this.initAnimationMixer();
+		this.initControls();
 		this._setMouseEvents();
 	}
 	initRenderer(){
@@ -91,6 +93,21 @@ class itisModelViewer extends EventEmitter{
 		this.setCamera(this.defaultCamera);
 		this.setScene(scene);
 	}
+	initControls(){
+		const controls =this.controls= new OrbitControls(this.camera, this.renderer.domElement );
+		controls.dampingFactor=1.5;
+		controls.enableDamping=true;
+		controls.mouseButtons = {
+			LEFT: THREE.MOUSE.ROTATE,
+			MIDDLE: THREE.MOUSE.PAN,
+			// RIGHT: THREE.MOUSE.RIGHT,
+		};
+		controls.zoomSpeed=0.5;
+		controls.saveState();
+		this.on('beforeRefresh',e=>{
+			controls.update();
+		});
+	}
 	initDefaultCamera(){
 		/* create a default camera */
 		const camera=this.defaultCamera = new THREE.PerspectiveCamera( 75,this.width / this.height, 0.1, 1000 );
@@ -107,13 +124,11 @@ class itisModelViewer extends EventEmitter{
 	}
 	_setMouseEvents(){
 		/*const ca=this.camera,
-			S=this.scene ,
-			R=this.rotateScene,
-			M=this.moveScene */;
-		enableMouseDrag();
-		this.renderer.domElement.setAttribute('mousedragevent','true');
+			S=this.scene*/;
+		// enableMouseDrag();
+		// this.renderer.domElement.setAttribute('mousedragevent','true');
 		addEvents(this.renderer.domElement,{
-			'mousedrag':e=>{
+			/* 'mousedrag':e=>{
 				const S=this.scene;
 				let B=e.buttons;//1:L 2:R 3:L+R 4:M 5:L+M 6:R+M 7:L+R+M
 				switch(B){
@@ -135,14 +150,14 @@ class itisModelViewer extends EventEmitter{
 				if(s<0.01)s=0.01;
 				else if(s>10)s=10;
 				S.scale.set(s,s,s);
-			},
-			'mousedown':e=>{
+			}, */
+			/* 'click':e=>{
 				if(e.buttons===2){
 					e.preventDefault();
 					this.resetView();
 				}
-			},
-			'contextmenu':e=>e.preventDefault(),
+			}, */
+			'contextmenu':e=>{this.controls.reset();e.preventDefault()},
 		});
 	}
 	resetView(){
@@ -166,7 +181,11 @@ class itisModelViewer extends EventEmitter{
 			/* convert lights 
 				light's intensity clamp between 0-1 here */
 			this.processObjects(gltf.scene,o=>o instanceof THREE.Light,light=>{
-				light.intensity/=1000;
+				if(light instanceof THREE.DirectionalLight){
+					// light.intensity/=10;
+				}else{
+					light.intensity/=1000;
+				}
 			});
 			this.scene.add(gltf.scene);
 			this.resetView();
