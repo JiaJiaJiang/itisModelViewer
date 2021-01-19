@@ -82,7 +82,7 @@ function transjs(name,cover=90){
 	.pipe(gulp.dest(dist));
 }
 gulp.task('js',function(){
-	return transjs('itisModelViewer.js',90);
+	return transjs('itisModelViewer.js',50);
 });
 
 gulp.task('clean',async function(){

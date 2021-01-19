@@ -1,6 +1,10 @@
 const THREE=require('three');
-import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
-import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
+const NodeUrl = require('url');
+// import { GLTFLoader } from 'three/examples/js/loaders/GLTFLoader.js';
+// import { OrbitControls } from 'three/examples/js/controls/OrbitControls.js';
+const { GLTFLoader }=require('three/examples/jsm/loaders/GLTFLoader.js');
+const { OrbitControls }=require('three/examples/jsm/controls/OrbitControls.js');
+const { FBXLoader } =require('three/examples/jsm/loaders/FBXLoader.js');
 
 import {enableMouseDrag,addEvents} from './eventUtils.js';
 const EventEmitter = require('events');
@@ -41,7 +45,7 @@ class itisModelViewer extends EventEmitter{
 		this.initDefaultCamera();
 		if(url){
 			this.initDefaultScene(false);
-			this.loadGLTF(url);
+			this.loadFile(url);
 		}else{
 			this.initDefaultScene();
 		}
@@ -56,10 +60,12 @@ class itisModelViewer extends EventEmitter{
 			canvas:opts.canvas,
 			antialias:true,
 			alpha:false,
+			precision:'highp',
 		};
 		const rendererOpts=Object.assign({},defaultRendererOpts,opts.rendererOpts);
 		const renderer=this.renderer = new THREE.WebGLRenderer(rendererOpts);
 		renderer.setSize(this.width,this.height);
+		renderer.setClearColor(new THREE.Color( "rgb(20,20,20)"));
 		if(!opts.canvas){
 			opts.parent.appendChild(renderer.domElement);
 		}
@@ -97,6 +103,7 @@ class itisModelViewer extends EventEmitter{
 		const controls =this.controls= new OrbitControls(this.camera, this.renderer.domElement );
 		controls.dampingFactor=1.5;
 		controls.enableDamping=true;
+		controls.enableZoom=false;
 		controls.mouseButtons = {
 			LEFT: THREE.MOUSE.ROTATE,
 			MIDDLE: THREE.MOUSE.PAN,
@@ -110,7 +117,7 @@ class itisModelViewer extends EventEmitter{
 	}
 	initDefaultCamera(){
 		/* create a default camera */
-		const camera=this.defaultCamera = new THREE.PerspectiveCamera( 75,this.width / this.height, 0.1, 1000 );
+		const camera=this.defaultCamera = new THREE.PerspectiveCamera( 75,this.width / this.height, 0.001, 1000 );
 		camera.position.set(0,5,5);
 		camera.lookAt(0,0,0);
 	}
@@ -123,10 +130,10 @@ class itisModelViewer extends EventEmitter{
 
 	}
 	_setMouseEvents(){
-		/*const ca=this.camera,
-			S=this.scene*/;
-		// enableMouseDrag();
-		// this.renderer.domElement.setAttribute('mousedragevent','true');
+		const ca=this.camera,
+			S=this.scene;
+		enableMouseDrag();
+		this.renderer.domElement.setAttribute('mousedragevent','true');
 		addEvents(this.renderer.domElement,{
 			/* 'mousedrag':e=>{
 				const S=this.scene;
@@ -143,21 +150,21 @@ class itisModelViewer extends EventEmitter{
 						break;
 					}
 				}
-			},
+			}, */
 			'wheel':e=>{//scale
 				const S=this.scene;
 				let s=S.scale.x*(1-e.deltaY/1000);
 				if(s<0.01)s=0.01;
-				else if(s>10)s=10;
+				else if(s>1000)s=1000;
 				S.scale.set(s,s,s);
-			}, */
-			/* 'click':e=>{
+			},
+			'click':e=>{
 				if(e.buttons===2){
 					e.preventDefault();
 					this.resetView();
 				}
-			}, */
-			'contextmenu':e=>{this.controls.reset();e.preventDefault()},
+			},
+			'contextmenu':e=>{this.resetView();this.controls.reset();e.preventDefault()},
 		});
 	}
 	resetView(){
@@ -174,27 +181,49 @@ class itisModelViewer extends EventEmitter{
 
 		return 1;
 	}
-	loadGLTF(url){
-		const loader = new GLTFLoader();
-		loader.load(url,gltf=>{
-			console.log(gltf)
+	loadFile(fileurl){
+		const url=NodeUrl.parse(fileurl);
+		let loader;
+		if(url.pathname.match(/.gl(b|tf)$/i)){
+			loader = new GLTFLoader();
+		}else if(url.pathname.match(/.fbx$/i)){
+			loader = new FBXLoader();
+		}else{
+			throw(new Error('format not supported'));
+		}
+		loader.load(fileurl,result=>{
+			console.log('file loaded',result);
+			let scene;
+			if(result instanceof THREE.Object3D){
+				scene=result;
+			}else{
+				scene=result.scene;
+			}
+			scene.traverse(function(child){
+				if ( child.isMesh ) {
+					child.castShadow = true;
+					child.receiveShadow = true;
+				}
+			} );
+
 			/* convert lights 
 				light's intensity clamp between 0-1 here */
-			this.processObjects(gltf.scene,o=>o instanceof THREE.Light,light=>{
+			/* this.processObjects(scene,o=>o instanceof THREE.Light,light=>{
 				if(light instanceof THREE.DirectionalLight){
 					// light.intensity/=10;
 				}else{
-					light.intensity/=1000;
+					light.intensity/=10;
 				}
-			});
-			this.scene.add(gltf.scene);
+			}); */
+			this.scene.add(scene);
 			this.resetView();
 
-
-			gltf.mixer = new THREE.AnimationMixer(gltf);
-			this.animationMixerList.push(gltf.mixer);
-			// const action = gltf.mixer.clipAction(gltf.animations[0]);
-			// action.play();
+			result.mixer = new THREE.AnimationMixer(scene);
+			this.animationMixerList.push(result.mixer);
+			for(let ani of result.animations){
+				const action = result.mixer.clipAction(ani);
+				action.play();
+			}
 		},xhr=>{
 			// console.log(xhr.loaded, ' loaded' );
 		},error=>{
@@ -282,6 +311,7 @@ class itisModelViewer extends EventEmitter{
 			this.renderer.render(this.scene,this.camera);
 		this.emit('aftereRefresh');
 	}
+
 };
 itisModelViewer.THREE=THREE;
 

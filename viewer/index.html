@@ -6,7 +6,11 @@
 	</head>
 	<body>
 		<script>
-			const viewer=new itisModelViewer(/* 0&& */'./1.glb',{
+			const viewer=new itisModelViewer(
+				/* 0&& */
+				'./just_a_girl/scene.gltf'
+				// './3.glb'
+				,{
 				width:1500,height:1200,
 			});
 			const THREE=itisModelViewer.THREE;
@@ -17,5 +21,8 @@
 			}
 			animate();
 		</script>
+		<div id="controller">
+			<div name="scale"><span id="scale_value">100</span>%</div>
+		</div>
 	</body>
 </html>
