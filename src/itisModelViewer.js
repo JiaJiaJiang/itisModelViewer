@@ -19,6 +19,7 @@ class itisModelViewer extends EventEmitter{
 		this.currentCamera=null;//current using camera
 		this.currentScene=null;//current using scene
 		this.controls=null;
+		this._maxPointPosition=0;
 	}
 	get width(){return this.opts.width;}
 	set width(v){this.opts.width=v;}
@@ -101,9 +102,9 @@ class itisModelViewer extends EventEmitter{
 	}
 	initControls(){
 		const controls =this.controls= new OrbitControls(this.camera, this.renderer.domElement );
-		controls.dampingFactor=1.5;
+		controls.dampingFactor=0.01;
 		controls.enableDamping=true;
-		controls.enableZoom=false;
+		// controls.enableZoom=false;
 		controls.mouseButtons = {
 			LEFT: THREE.MOUSE.ROTATE,
 			MIDDLE: THREE.MOUSE.PAN,
@@ -130,10 +131,10 @@ class itisModelViewer extends EventEmitter{
 
 	}
 	_setMouseEvents(){
-		const ca=this.camera,
+		/* const ca=this.camera,
 			S=this.scene;
 		enableMouseDrag();
-		this.renderer.domElement.setAttribute('mousedragevent','true');
+		this.renderer.domElement.setAttribute('mousedragevent','true'); */
 		addEvents(this.renderer.domElement,{
 			/* 'mousedrag':e=>{
 				const S=this.scene;
@@ -151,20 +152,20 @@ class itisModelViewer extends EventEmitter{
 					}
 				}
 			}, */
-			'wheel':e=>{//scale
+			/* 'wheel':e=>{//scale
 				const S=this.scene;
 				let s=S.scale.x*(1-e.deltaY/1000);
 				if(s<0.01)s=0.01;
 				else if(s>1000)s=1000;
 				S.scale.set(s,s,s);
-			},
-			'click':e=>{
+			}, */
+			/* 'click':e=>{
 				if(e.buttons===2){
 					e.preventDefault();
 					this.resetView();
 				}
-			},
-			'contextmenu':e=>{this.resetView();this.controls.reset();e.preventDefault()},
+			}, */
+			'contextmenu':e=>{/* this.resetView(); */this.controls.reset();e.preventDefault()},
 		});
 	}
 	resetView(){
@@ -178,8 +179,7 @@ class itisModelViewer extends EventEmitter{
 		this.camera.lookAt(0,0,0);
 	}
 	getFitScale(){
-
-		return 1;
+		return 2.5/(this._maxPointPosition||2.5);
 	}
 	loadFile(fileurl){
 		const url=NodeUrl.parse(fileurl);
@@ -199,12 +199,19 @@ class itisModelViewer extends EventEmitter{
 			}else{
 				scene=result.scene;
 			}
-			scene.traverse(function(child){
+			scene.traverse(child=>{
 				if ( child.isMesh ) {
 					child.castShadow = true;
 					child.receiveShadow = true;
+					if(child.geometry){
+						console.log(child);
+						let {min,max}=child.geometry.boundingBox;
+						let ps=[min.x,min.y,min.z,max.x,max.y,max.z].map(v=>Math.abs(v));
+						this._maxPointPosition=Math.max(...ps);
+					}
 				}
 			} );
+			console.log('最远点',this._maxPointPosition);
 
 			/* convert lights 
 				light's intensity clamp between 0-1 here */
@@ -307,6 +314,7 @@ class itisModelViewer extends EventEmitter{
 		for(let mixer of this.animationMixerList){
 			mixer.update(this.clock.getDelta());
 		}
+		this.controls.update();
 		if(this.scene&&this.camera)
 			this.renderer.render(this.scene,this.camera);
 		this.emit('aftereRefresh');
