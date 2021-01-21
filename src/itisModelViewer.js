@@ -67,8 +67,7 @@ class itisModelViewer extends EventEmitter{
 		const renderer=this.renderer = new THREE.WebGLRenderer(rendererOpts);
 		renderer.setSize(this.width,this.height);
 		renderer.setClearColor(new THREE.Color( "rgb(20,20,20)"));
-		renderer.setPixelRatio(renderer.getPixelRatio());
-		// renderer.shadowMap.enabled = true;
+		renderer.setPixelRatio(devicePixelRatio);
 		if(!opts.canvas){
 			opts.parent.appendChild(renderer.domElement);
 		}

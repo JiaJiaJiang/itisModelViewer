@@ -14085,7 +14085,7 @@ class itisModelViewer extends EventEmitter {
     const renderer = this.renderer = new THREE.WebGLRenderer(rendererOpts);
     renderer.setSize(this.width, this.height);
     renderer.setClearColor(new THREE.Color("rgb(20,20,20)"));
-    renderer.setPixelRatio(renderer.getPixelRatio()); // renderer.shadowMap.enabled = true;
+    renderer.setPixelRatio(devicePixelRatio);
 
     if (!opts.canvas) {
       opts.parent.appendChild(renderer.domElement);
@@ -14281,6 +14281,7 @@ class itisModelViewer extends EventEmitter {
       console.log(xhr);
       this.emit('fileLoadingProgress', xhr.loaded, xhr.total); // console.log(xhr.loaded, ' loaded' );
     }, error => {
+      this.emit('fileLoadingError', error);
       console.error(error);
     });
   }
