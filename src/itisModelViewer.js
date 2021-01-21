@@ -116,7 +116,7 @@ class itisModelViewer extends EventEmitter{
 		const controls =this.controls= new OrbitControls(this.camera, this.renderer.domElement );
 		controls.dampingFactor=0.05;
 		controls.enableDamping=true;
-		controls.enableZoom=false;
+		// controls.enableZoom=false;
 		controls.mouseButtons = {
 			LEFT: THREE.MOUSE.ROTATE,
 			MIDDLE: THREE.MOUSE.PAN,
@@ -152,13 +152,13 @@ class itisModelViewer extends EventEmitter{
 	}
 	_setMouseEvents(){
 		addEvents(this.renderer.domElement,{
-			'wheel':e=>{//scale
+			/* 'wheel':e=>{//scale
 				const S=this.scene;
 				let s=S.scale.x*(1-e.deltaY/1000);
 				if(s<0.01)s=0.01;
 				else if(s>1000)s=1000;
 				S.scale.set(s,s,s);
-			},
+			}, */
 			'contextmenu':e=>{this.resetView();e.preventDefault()},
 		});
 	}
