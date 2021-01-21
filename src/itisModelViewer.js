@@ -16,6 +16,7 @@ class itisModelViewer extends EventEmitter{
 		this.animationMixerList=null;
 		this.defaultCamera=null;//for view of scene's transform
 		this.defaultScene=null;//loaded when no url specified
+		this.loadedScene=null;//loaded scene from fils
 		this.currentCamera=null;//current using camera
 		// this.currentScene=null;//current using scene
 		this.controls=null;
@@ -66,6 +67,7 @@ class itisModelViewer extends EventEmitter{
 		const renderer=this.renderer = new THREE.WebGLRenderer(rendererOpts);
 		renderer.setSize(this.width,this.height);
 		renderer.setClearColor(new THREE.Color( "rgb(20,20,20)"));
+		renderer.setPixelRatio(renderer.getPixelRatio());
 		// renderer.shadowMap.enabled = true;
 		if(!opts.canvas){
 			opts.parent.appendChild(renderer.domElement);
@@ -115,6 +117,7 @@ class itisModelViewer extends EventEmitter{
 		const controls =this.controls= new OrbitControls(this.camera, this.renderer.domElement );
 		controls.dampingFactor=0.05;
 		controls.enableDamping=true;
+		controls.enableZoom=false;
 		controls.mouseButtons = {
 			LEFT: THREE.MOUSE.ROTATE,
 			MIDDLE: THREE.MOUSE.PAN,
@@ -132,7 +135,7 @@ class itisModelViewer extends EventEmitter{
 	initDefaultCamera(){
 		/* create a default camera */
 		const camera=this.defaultCamera = new THREE.PerspectiveCamera( 75,this.width / this.height, 0.001, 1000 );
-		camera.position.set(0,1,5);
+		camera.position.set(0,0.5,5);
 		camera.lookAt(0,0,0);
 		this.currentCamera=this.defaultCamera;
 	}
@@ -150,11 +153,27 @@ class itisModelViewer extends EventEmitter{
 	}
 	_setMouseEvents(){
 		addEvents(this.renderer.domElement,{
+			'wheel':e=>{//scale
+				const S=this.scene;
+				let s=S.scale.x*(1-e.deltaY/1000);
+				if(s<0.01)s=0.01;
+				else if(s>1000)s=1000;
+				S.scale.set(s,s,s);
+			},
 			'contextmenu':e=>{this.resetView();e.preventDefault()},
 		});
 	}
 	resetView(){
 		this.controls.reset();
+		//change scale of the scene to fit screen
+		let scale=this.getFitScale(),center=this._center;
+		if(!this.loadedScene)return;
+		this.loadedScene.scale.set(scale,scale,scale);
+		if(this.opts.focusOnObject){
+			this.loadedScene.position.set(-center.x*scale,-center.z*scale,-center.y*scale);
+		}else{
+			this.loadedScene.position.set(0,0,0);
+		}
 		/* const S=this.scene;
 		let scale=this.getFitScale();
 		S.scale.set(scale,scale,scale); */
@@ -270,19 +289,22 @@ class itisModelViewer extends EventEmitter{
 			});
 			this._maxDistanceToCenter=farthest;
 			//change scale of the scene to fit screen
-			let scale=this.getFitScale();
+			/* let scale=this.getFitScale();
 			scene.scale.set(scale,scale,scale);
 			if(this.opts.focusOnObject){
 				scene.position.set(-center.x*scale,-center.z*scale,-center.y*scale);
-			}
+			}else{
+				scene.position.set(0,0,0);
+			} */
 			//remove previous scene
 			for(let child of this.scene.children){
-				if(child.loadedScene===true){
-					child.loadedScene=false;
-					child.parent=null;
+				if(child===this.loadedScene){
+					// child.loadedScene=false;
+					child.parent.remove(child);
 				}
 			}
-			scene.loadedScene=true;
+			this.loadedScene=scene;
+			// scene.loadedScene=true;
 			// animation
 			scene.mixer = new THREE.AnimationMixer(scene);
 			this.animationMixerList.push(scene.mixer);
@@ -290,8 +312,8 @@ class itisModelViewer extends EventEmitter{
 				const action = scene.mixer.clipAction(ani);
 				action.play();
 			}
-
 			this.scene.add(scene);
+			this.resetView();
 		}else{
 			throw(new TypeError('scene must be an instance of THREE.Object3D'));
 		}
