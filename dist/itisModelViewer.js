@@ -14230,6 +14230,7 @@ class itisModelViewer extends EventEmitter {
         scene = result;
       } else if (result.scene instanceof THREE.Object3D) {
         scene = result.scene;
+        scene.animations = result.animations;
       } else {
         throw new Error('not supported model');
       }
@@ -14264,7 +14265,7 @@ class itisModelViewer extends EventEmitter {
   setCamera(target, findCameraOnly = true) {
     if (target === null) {
       this.defaultCamera.parent = null;
-      this.currentCamera = this.defaultCamera;
+      this.setCamera(this.defaultCamera);
       return;
     } else if (typeof target == 'string' || target instanceof RegExp) {
       let found = this.findTarget(target, findCameraOnly ? THREE.Camera : null);

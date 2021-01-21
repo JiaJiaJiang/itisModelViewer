@@ -182,6 +182,7 @@ class itisModelViewer extends EventEmitter{
 				scene=result;
 			}else if(result.scene instanceof THREE.Object3D){
 				scene=result.scene;
+				scene.animations=result.animations;
 			}else{
 				throw(new Error('not supported model'));
 			}
