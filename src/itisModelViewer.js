@@ -227,6 +227,7 @@ class itisModelViewer extends EventEmitter{
 			this.emit('fileLoadingProgress',xhr.loaded,xhr.total);
 			// console.log(xhr.loaded, ' loaded' );
 		},error=>{
+			this.emit('fileLoadingError',error);
 			console.error( error );
 		});
 	}

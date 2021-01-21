@@ -24,15 +24,18 @@ if(!pageArgs.url){//hide loading animation if no url
 	loading_dom.style.display='none';
 }
 const viewer=new itisModelViewer(
-	// pageArgs.url
+	pageArgs.url
 	// null
-	'./just_a_girl/scene.gltf'
+	// './just_a_girl/scene.gltf'
 	// './3.fbx'
 	// './3.glb'
 	// './4.glb'
 	,{});
 // const THREE=itisModelViewer.THREE;
-viewer.once('fileLoaded',()=>{loading_dom.style.display='none';});
+viewer.once('fileLoaded',()=>{loading_dom.style.display='none';})
+.once('fileLoadingError',err=>{
+	progress_dom.innerHTML='Error';
+});
 viewer.on('fileLoadingProgress',(loaded,total)=>{
 	if(!total){
 		progress_dom.innerHTML=convSize(loaded);
