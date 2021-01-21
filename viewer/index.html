@@ -3,71 +3,12 @@
 		<meta charset="utf-8">
 		<title>itisModileViewer demo</title>
 		<script src="../dist/itisModelViewer.js"></script>
-	</head>
-	<body>
-		<div id="controller_dom">
-			<!-- <div name="scale"><span id="scale_value_dom">100</span>%</div> -->
-		</div>
-		<div id="loading_dom">
-loading
-		</div>
-<script>
-function rmEmptyDup(arr){
-	return  [...new Set(arr)].filter(e=>e&&e.trim());
-}
-function setPageArg(name,value){
-	if(value == undefined){
-		delete pageArgs[name];
-		return;
-	}
-	pageArgs[name]=encodeURIComponent(value);
-	var l=[];
-	for(a in pageArgs){
-		l.push(`${a}=${pageArgs[a]}`);
-	}
-	location.hash=l.join('&');
-}
-var pageArgs={};
-rmEmptyDup(location.hash.replace(/^\#/,'').split('&')).map(a=>{
-	var p=a.split('=');
-	if(p.length){
-		pageArgs[p.shift()]=decodeURIComponent(p.join('='));
-	}
-});
-
-if(!pageArgs.url){//hide loading animation if no url
-	loading_dom.style.display='none';
-}
-const viewer=new itisModelViewer(
-	pageArgs.url
-	// null
-	// './just_a_girl/scene.gltf'
-	// './3.glb'
-	// './4.glb'
-	,{
-	// width:1500,height:1200,
-});
-const THREE=itisModelViewer.THREE;
-viewer.once('fileloaded',()=>{loading_dom.style.display='none';});
-
-
-function fullFillCanvas(){
-	viewer.resize(window.innerWidth,window.innerHeight);
-}
-fullFillCanvas();
-window.addEventListener('resize',e=>fullFillCanvas());
-function animate() {
-	requestAnimationFrame(animate);
-	viewer.refresh();
-}
-animate();
-</script>
 		<style>
 			body{
 				margin:0;padding:0;
 			}
 			#controller_dom{
-
+		
 			}
 			#loading_dom{
 				position: fixed;
@@ -75,8 +16,17 @@ animate();
 				top:0;
 				width:100%;
 				height: 100%;
-				background-color: rgba(0, 0, 0, 0.384);
+				background-color: rgba(0, 0, 0, 1);
 				z-index: 100;
+				transition: background-color 0.8s;
+			}
+			#progress_dom{
+				color: #fff;
+				position: absolute;
+				top: 80%;
+				width: 100%;
+				text-align: center;
+				font-size: 2.1vh;
 			}
 			canvas{
 				position: fixed;
@@ -87,5 +37,14 @@ animate();
 				z-index: 1;
 			}
 		</style>
+	</head>
+	<body>
+		<div id="controller_dom">
+			<!-- <div name="scale"><span id="scale_value_dom">100</span>%</div> -->
+		</div>
+		<div id="loading_dom">
+			<span id="progress_dom">0K</span>
+		</div>
+		<script src="./viewer.js"></script>
 	</body>
 </html>

@@ -19,12 +19,9 @@ class itisModelViewer extends EventEmitter{
 		this.currentCamera=null;//current using camera
 		// this.currentScene=null;//current using scene
 		this.controls=null;
-		this._maxPointPosition=0;
-		this._bounding={
-			xmax:0,xmin:0,
-			ymax:0,ymin:0,
-			zmax:0,zmin:0,
-		}
+		this.cameras=[];
+		this._maxDistanceToCenter=0;
+		this._center=THREE.Vector3;
 	}
 	get width(){return this.opts.width;}
 	set width(v){this.opts.width=v;}
@@ -50,14 +47,11 @@ class itisModelViewer extends EventEmitter{
 		this.initRenderer();
 		this.initDefaultCamera();
 		if(url){
-			this.initDefaultScene(false);
 			this.loadFile(url);
-		}else{
-			this.initDefaultScene();
 		}
-		this.initAnimationMixer();
 		this.initControls();
-		this._setMouseEvents();
+		this.initAnimationMixer();
+		this.initDefaultScene();
 	}
 	initRenderer(){
 		const opts=this.opts;
@@ -77,11 +71,10 @@ class itisModelViewer extends EventEmitter{
 			opts.parent.appendChild(renderer.domElement);
 		}
 	}
-	initDefaultScene(createDefaultObject=true){
+	initDefaultScene(/* createDefaultObject=true */){
 		const opts=this.opts;
 		/* create default scene */
 		const scene=this.defaultScene = new THREE.Scene();
-		// rotateScene.rotation.x=Math.PI/180*45;
 		/* create a light */
 		const alight = new THREE.AmbientLight( 0x404040 ); // soft white light
 		alight.name='default_light';
@@ -98,20 +91,27 @@ class itisModelViewer extends EventEmitter{
 				hemiLight.position.set( 0, 50, 0 );
 				this.scene.add( hemiLight ); */
 
-		if(createDefaultObject){
 			/* create a cube */
 			const cube = new THREE.Mesh( new THREE.BoxGeometry(), new THREE.MeshPhongMaterial( { color: 0x66ccff } ) );
 			this.defaultScene.add( cube );
-			this.on('beforeRefresh',()=>{
+			this.once('fileLoaded',()=>{
+				cube.geometry.dispose();
+				cube.material.dispose();
+				this.defaultScene.remove( cube );
+				console.log(cube)
+				this.removeListener('beforeRefresh', rotateCube);
+			});
+			function rotateCube(){
 				cube.rotation.x += 0.01;
 				cube.rotation.y += 0.01;
-			});
-		}
+			}
+			this.on('beforeRefresh',rotateCube);
 		// this.scene.add(this.defaultCamera);
 		this.setCamera(this.defaultCamera);
 		// this.setScene(scene);
 	}
 	initControls(){
+		this._setMouseEvents();
 		const controls =this.controls= new OrbitControls(this.camera, this.renderer.domElement );
 		controls.dampingFactor=0.05;
 		controls.enableDamping=true;
@@ -134,6 +134,7 @@ class itisModelViewer extends EventEmitter{
 		const camera=this.defaultCamera = new THREE.PerspectiveCamera( 75,this.width / this.height, 0.001, 1000 );
 		camera.position.set(0,1,5);
 		camera.lookAt(0,0,0);
+		this.currentCamera=this.defaultCamera;
 	}
 	initAnimationMixer(){
 		const opts=this.opts;
@@ -149,10 +150,11 @@ class itisModelViewer extends EventEmitter{
 	}
 	_setMouseEvents(){
 		addEvents(this.renderer.domElement,{
-			'contextmenu':e=>{this.controls.reset();e.preventDefault()},
+			'contextmenu':e=>{this.resetView();e.preventDefault()},
 		});
 	}
 	resetView(){
+		this.controls.reset();
 		/* const S=this.scene;
 		let scale=this.getFitScale();
 		S.scale.set(scale,scale,scale); */
@@ -161,7 +163,7 @@ class itisModelViewer extends EventEmitter{
 		this.camera.lookAt(0,0,0); */
 	}
 	getFitScale(){
-		return 3/(this._maxPointPosition||3);
+		return 4/(this._maxDistanceToCenter||4);
 	}
 	loadFile(fileurl){
 		const url=NodeUrl.parse(fileurl);
@@ -199,16 +201,10 @@ class itisModelViewer extends EventEmitter{
 				}
 			}); */
 			this.setScene(scene);
-			// this.resetView();
-
-			result.mixer = new THREE.AnimationMixer(scene);
-			this.animationMixerList.push(result.mixer);
-			for(let ani of result.animations){
-				const action = result.mixer.clipAction(ani);
-				action.play();
-			}
-			this.emit('fileloaded');
+			this.emit('fileLoaded');
 		},xhr=>{
+			console.log(xhr)
+			this.emit('fileLoadingProgress',xhr.loaded,xhr.total);
 			// console.log(xhr.loaded, ' loaded' );
 		},error=>{
 			console.error( error );
@@ -217,7 +213,7 @@ class itisModelViewer extends EventEmitter{
 	setCamera(target,findCameraOnly=true){
 		if(target===null){
 			this.defaultCamera.parent=null;
-			this.currentCamera=this.defaultCamera;
+			this.setCamera(this.defaultCamera);
 			return;
 		}else if(typeof target=='string' || target instanceof RegExp){
 			let found=this.findTarget(target,findCameraOnly?THREE.Camera:null);
@@ -227,50 +223,73 @@ class itisModelViewer extends EventEmitter{
 			}
 			return;
 		}else if(target instanceof THREE.Camera){
+			if('aspect' in target)target.aspect=this.width/this.height;
+			target.updateProjectionMatrix&&target.updateProjectionMatrix();
+			this.controls.enabled=this.defaultCamera===target;
 			this.currentCamera=target;
 		}else if(target instanceof THREE.Object3D){
-			target.add(this.defaultCamera);
-			this.currentCamera=this.defaultCamera;
+			this.setCamera(this.defaultCamera);
+			/* target.add(this.defaultCamera);
+			this.currentCamera=this.defaultCamera; */
 		}
 	}
 	setScene(scene){
 		if(scene===this.scene){
-			throw(new Error('cannot add default scene to it self'));
+			throw(new Error('cannot add scene to it self'));
 		}
 		if(scene instanceof THREE.Object3D){
 			let hasLight=false;
-			let _b=this._bounding;//find the border of all models
+			let points=[];
+			this.cameras.length=0;
+			//find center of the model and check if a default light is needed
 			scene.traverse(child=>{
+				if(child instanceof THREE.Camera)this.cameras.push(child);//get a camera list from the scene
 				if(child instanceof THREE.Light)hasLight=true;//check if there are lights
-				if (child.isMesh) {
-					if(child.geometry){
-						let {min,max}=child.geometry.boundingBox;
-						let ps=[min.x,min.y,min.z,max.x,max.y,max.z].map(v=>Math.abs(v));
-						this._maxPointPosition=Math.max(...ps);
-						if(min.x<_b.xmin)_b.xmin=min.x;
-						if(min.y<_b.ymin)_b.ymin=min.y;
-						if(min.z<_b.zmin)_b.zmin=min.z;
-						if(max.x>_b.xmax)_b.xmax=max.x;
-						if(max.y>_b.ymax)_b.ymax=max.y;
-						if(max.z>_b.zmax)_b.zmax=max.z;
-					}
+				if (child.isMesh&&child.geometry) {
+					if(!child.geometry.boundingBox)
+					console.log(child.geometry.computeBoundingBox());
+					let {min,max}=child.geometry.boundingBox;
+					points.push(min);
+					points.push(max);
 				}
 			});
 			this.scene.getObjectByName('default_light').visible=!hasLight;//show default light if there is no light
+			let center=this._center=itisModelViewer.calcCenter(points);
+			console.log('center',center)
+			let farthest=0;
+			//find the farthest point from the center to get a scale
+			scene.traverse(child=>{
+				if (child.isMesh&&child.geometry) {
+					let {min,max}=child.geometry.boundingBox;
+					let dis=center.distanceTo(min);
+					if(dis>farthest)farthest=dis;
+					dis=center.distanceTo(max);
+					if(dis>farthest)farthest=dis;
+				}
+			});
+			this._maxDistanceToCenter=farthest;
 			//change scale of the scene to fit screen
 			let scale=this.getFitScale();
 			scene.scale.set(scale,scale,scale);
 			if(this.opts.focusOnObject){
-				scene.position.set(-(_b.xmin+_b.xmax)/2*scale,-(_b.zmin+_b.zmax)/2*scale,-(_b.ymin+_b.ymax)/2*scale);
+				scene.position.set(-center.x*scale,-center.z*scale,-center.y*scale);
 			}
-
-			for(let child of this.scene.children){//remove previous scene
+			//remove previous scene
+			for(let child of this.scene.children){
 				if(child.loadedScene===true){
 					child.loadedScene=false;
 					child.parent=null;
 				}
 			}
 			scene.loadedScene=true;
+			// animation
+			scene.mixer = new THREE.AnimationMixer(scene);
+			this.animationMixerList.push(scene.mixer);
+			for(let ani of scene.animations){
+				const action = scene.mixer.clipAction(ani);
+				action.play();
+			}
+
 			this.scene.add(scene);
 		}else{
 			throw(new TypeError('scene must be an instance of THREE.Object3D'));
@@ -323,7 +342,16 @@ class itisModelViewer extends EventEmitter{
 			this.renderer.render(this.scene,this.camera);
 		this.emit('aftereRefresh');
 	}
-
+	static calcCenter(points){
+		console.log(points)
+		let x=0,y=0,z=0,L=points.length;
+		for(let p of points){
+			x+=p.x;
+			y+=p.y;
+			z+=p.z;
+		}
+		return new THREE.Vector3(x/L,y/L,z/L);
+	}
 };
 itisModelViewer.THREE=THREE;
 
