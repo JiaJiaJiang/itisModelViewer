@@ -38,10 +38,10 @@ viewer.once('fileLoaded',()=>{loading_dom.style.display='none';})
 });
 viewer.on('fileLoadingProgress',(loaded,total)=>{
 	if(!total){
-		progress_dom.innerHTML=convSize(loaded);
+		progress_dom.innerHTML=`Loading<br>${convSize(loaded)}`;
 		loading_dom.style.backgroundColor=`rgba(0,0,0,${Math.round((Math.random()*0.5+0.5)*100)/100})`;
 	}else{
-		progress_dom.innerHTML=`${convSize(loaded)}/${convSize(total)}`;
+		progress_dom.innerHTML=`Loading<br>${convSize(loaded)}/${convSize(total)}`;
 		loading_dom.style.backgroundColor=`rgba(0,0,0,${1-loaded/total})`;
 	}
 });
