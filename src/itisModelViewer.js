@@ -1,7 +1,7 @@
 const THREE=require('three');
 const NodeUrl = require('url');
 // import { GLTFLoader } from 'three/examples/js/loaders/GLTFLoader.js';
-// import { OrbitControls } from 'three/examples/js/controls/OrbitControls.js';
+const { DRACOLoader }=require('three/examples/jsm/loaders/DRACOLoader.js');
 const { GLTFLoader }=require('three/examples/jsm/loaders/GLTFLoader.js');
 const { OrbitControls }=require('three/examples/jsm/controls/OrbitControls.js');
 const { FBXLoader } =require('three/examples/jsm/loaders/FBXLoader.js');
@@ -23,6 +23,9 @@ class itisModelViewer extends EventEmitter{
 		this.cameras=[];
 		this._maxDistanceToCenter=0;
 		this._center=THREE.Vector3;
+		this.lastInteractive=0;
+		this.animatingTime=100;
+		// this.frameCalls=[];
 	}
 	get width(){return this.opts.width;}
 	set width(v){this.opts.width=v;}
@@ -30,6 +33,7 @@ class itisModelViewer extends EventEmitter{
 	set height(v){this.opts.height=v;}
 	get camera(){return this.currentCamera;}
 	get scene(){return this.defaultScene;}
+	get animating(){return Date.now()-this.lastInteractive<this.animatingTime;}
 	constructor(url,opts){
 		super();
 		this._vars();
@@ -62,12 +66,18 @@ class itisModelViewer extends EventEmitter{
 			antialias:true,
 			alpha:false,
 			precision:'highp',
+			logarithmicDepthBuffer:true,
 		};
 		const rendererOpts=Object.assign({},defaultRendererOpts,opts.rendererOpts);
 		const renderer=this.renderer = new THREE.WebGLRenderer(rendererOpts);
 		renderer.setSize(this.width,this.height);
 		renderer.setClearColor(new THREE.Color( "rgb(20,20,20)"));
 		renderer.setPixelRatio(devicePixelRatio);
+		renderer.sortObjects=false;
+		renderer.physicallyCorrectLights=true;
+		// renderer.shadowMap.enabled=true;
+		// renderer.shadowMap.autoUpdate=true;
+
 		if(!opts.canvas){
 			opts.parent.appendChild(renderer.domElement);
 		}
@@ -114,7 +124,7 @@ class itisModelViewer extends EventEmitter{
 	initControls(){
 		this._setMouseEvents();
 		const controls =this.controls= new OrbitControls(this.camera, this.renderer.domElement );
-		controls.dampingFactor=0.05;
+		controls.dampingFactor=0.02;
 		controls.enableDamping=true;
 		// controls.enableZoom=false;
 		controls.mouseButtons = {
@@ -122,11 +132,18 @@ class itisModelViewer extends EventEmitter{
 			MIDDLE: THREE.MOUSE.PAN,
 			// RIGHT: THREE.MOUSE.RIGHT,
 		};
-		controls.zoomSpeed=0.3;
+		controls.zoomSpeed=0.4;
 		controls.saveState();
-		/* controls.on('change',e=>{
-			console.log(e)
-		}) */
+		controls.addEventListener('change',e=>{
+			if(!this.animating)
+				requestAnimationFrame(()=>this.refresh(true));
+			this.lastInteractive=Date.now();
+		});
+		controls.addEventListener('start',e=>{
+			// if(!this.animating)
+			// requestAnimationFrame(()=>{viewer.refresh();});
+			// this.refresh();
+		});
 		this.on('beforeRefresh',e=>{
 			controls.update();
 		});
@@ -188,6 +205,9 @@ class itisModelViewer extends EventEmitter{
 		let loader;
 		if(url.pathname.match(/.gl(b|tf)$/i)){
 			loader = new GLTFLoader();
+			const dracoLoader = new DRACOLoader();
+			dracoLoader.setDecoderPath( '../lib/draco/' );
+			loader.setDRACOLoader(dracoLoader);
 		}else if(url.pathname.match(/.fbx$/i)){
 			loader = new FBXLoader();
 		}else{
@@ -205,6 +225,12 @@ class itisModelViewer extends EventEmitter{
 				throw(new Error('not supported model'));
 			}
 			scene.traverse(child=>{
+				/* if(child instanceof THREE.Light){
+					if('power' in child)
+						child.power*=child.intensity;
+					// child.intensity*=100;
+					child.castShadow=true;
+				} */
 				if (child.isMesh) {
 					child.castShadow = true;
 					child.receiveShadow = true;
@@ -264,8 +290,8 @@ class itisModelViewer extends EventEmitter{
 			//find center of the model and check if a default light is needed
 			scene.traverse(child=>{
 				if(child instanceof THREE.Camera)this.cameras.push(child);//get a camera list from the scene
-				if(child instanceof THREE.Light)hasLight=true;//check if there are lights
-				if (child.isMesh&&child.geometry) {
+				else if(child instanceof THREE.Light)hasLight=true;//check if there are lights
+				else if (child.isMesh&&child.geometry) {
 					if(!child.geometry.boundingBox)
 					console.log(child.geometry.computeBoundingBox());
 					let {min,max}=child.geometry.boundingBox;
@@ -355,7 +381,7 @@ class itisModelViewer extends EventEmitter{
 			}
 		}
 	}
-	refresh(){
+	refresh(callloop=false){
 		this.emit('beforeRefresh');
 		for(let mixer of this.animationMixerList){
 			mixer.update(this.clock.getDelta());
@@ -364,7 +390,20 @@ class itisModelViewer extends EventEmitter{
 		if(this.scene&&this.camera)
 			this.renderer.render(this.scene,this.camera);
 		this.emit('aftereRefresh');
+		if(this.animating||callloop){requestAnimationFrame(()=>this.refresh());}
 	}
+	/* nextFrame(cb){
+		if(this.frameCalls.length===0)
+		requestAnimationFrame(()=>{
+			let list=this.frameCalls;
+			this.frameCalls=[];
+			let c;
+			while(c=list.shift()){
+				c();
+			}
+		});
+		this.frameCalls.push(cb);
+	} */
 	static calcCenter(points){
 		console.log(points)
 		let x=0,y=0,z=0,L=points.length;
