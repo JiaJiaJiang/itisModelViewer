@@ -24,14 +24,19 @@ if(!pageArgs.url){//hide loading animation if no url
 	loading_dom.style.display='none';
 }
 const viewer=new itisModelViewer(
-	pageArgs.url
-	// null
-	// './just_a_girl/scene.gltf'
-	// './5/scene.gltf'
-	// './3.fbx'
-	// './3.glb'
-	// './4.glb'
-	,{});
+	pageArgs.url//url of the model
+	,{
+		gridHelper:('gridHelper' in pageArgs),//show a grid helper at zero point
+		wireframe:('wireframe' in pageArgs),//show all materials as wireframe
+		noAnimation:('noAnimation' in pageArgs),//do not play animations in the loaded file
+		shadow:('shadow' in pageArgs),//show shadow of the models. If turn on, only default lights will be visabled because it's hard to set all lights correctly
+		meshDebug:('meshDebug' in pageArgs),//
+		rendererOpts:{
+			precision:pageArgs.precision,//precision of shaders:lowp,mediump,highp
+			antialias:!('antialiasOff' in pageArgs),//have this opt to turn off antialias
+			alpha:('alpha' in pageArgs),//set the background transparent
+		}
+	});
 const THREE=itisModelViewer.THREE;
 viewer.once('fileLoaded',()=>{loading_dom.style.display='none';viewer.refresh();})
 .once('fileLoadingError',err=>{
@@ -46,6 +51,9 @@ viewer.on('fileLoadingProgress',(loaded,total)=>{
 		loading_dom.style.backgroundColor=`rgba(0,0,0,${1-loaded/total})`;
 	}
 });
+viewer.renderer.domElement.addEventListener('click',e=>{
+	console.log(viewer.objectsAt(e.offsetX, e.offsetY));
+});
 function convSize(byte){
 	let unit='B';
 	if(byte<1000){}
@@ -58,8 +66,7 @@ function convSize(byte){
 function fullFillCanvas(){viewer.resize(window.innerWidth,window.innerHeight);}
 fullFillCanvas();
 window.addEventListener('resize',e=>fullFillCanvas());
-function animate() {
+function animate() {//donot use it unless debug
 	requestAnimationFrame(animate);
 	viewer.refresh();
 }
-// animate();

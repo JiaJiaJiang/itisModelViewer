@@ -27,6 +27,8 @@ class itisModelViewer extends EventEmitter{
 		this.lastInteractive=0;
 		this.animatingTime=100;
 		this.boundingBox={min:new THREE.Vector3,max:new THREE.Vector3};
+		this.refreshFlag=false;//to prevent multi call of refresh in a frame
+		this.raycaster = new THREE.Raycaster();
 		// this.frameCalls=[];
 	}
 	get width(){return this.opts.width;}
@@ -35,7 +37,7 @@ class itisModelViewer extends EventEmitter{
 	// set height(v){this.opts.height=v;}
 	get camera(){return this.currentCamera;}
 	get scene(){return this.defaultScene;}
-	get animating(){return (Date.now()-this.lastInteractive<this.animatingTime)||(this.animationMixer.timeScale!==0&&this.loadedScene.actions?.length!==0);}
+	get animating(){return (Date.now()-this.lastInteractive<this.animatingTime)||(this.animationMixer?.timeScale&&this.loadedScene.actions?.length!==0);}
 	constructor(url,opts){
 		super();
 		this._vars();
@@ -46,8 +48,12 @@ class itisModelViewer extends EventEmitter{
 			parent:document.body,
 			rendererOpts:undefined,
 			focusOnObject:true,//move the object to center
+			gridHelper:false,
+			wireframe:false,
+			noAnimation:false,
+			shadow:false,
 		},opts);
-		
+		console.log('options',opts);
 		opts.width||(opts.width=opts.canvas?.width||300);
 		opts.height||(opts.height=opts.canvas?.height||300);
 
@@ -57,8 +63,33 @@ class itisModelViewer extends EventEmitter{
 			this.loadFile(url);
 		}
 		this.initControls();
-		// this.initAnimationMixer();
 		this.initDefaultScene();
+		if(opts.meshDebug)this.initMeshDebug();
+	}
+	objectsAt(x,y){
+		if(!this.loadedScene)return [];
+		this.raycaster.setFromCamera( new THREE.Vector2(
+			( x / this.width) * 2 - 1,
+			1-( y / this.height) * 2,
+		), this.camera );
+		const intersects = this.raycaster.intersectObjects( this.scene.children,true );
+		return intersects;
+	}
+	initMeshDebug(){
+		let changedObjects=[];
+		addEvents(this.renderer.domElement,{
+			'mousemove':e=>{
+				for(let target of changedObjects){
+					target.object.material.wireframe=false;
+				}
+				changedObjects.length=0;
+				changedObjects=this.objectsAt(e.offsetX,e.offsetY);
+				for(let target of changedObjects){
+					target.object.material.wireframe=true;
+				}
+				this.refresh();
+			}
+		});
 	}
 	initRenderer(){
 		const opts=this.opts;
@@ -71,14 +102,25 @@ class itisModelViewer extends EventEmitter{
 			logarithmicDepthBuffer:true,
 		};
 		const rendererOpts=Object.assign({},defaultRendererOpts,opts.rendererOpts);
+		console.log('renderer options',rendererOpts);
+
 		const renderer=this.renderer = new THREE.WebGLRenderer(rendererOpts);
 		renderer.setSize(this.width,this.height);
-		renderer.setClearColor(new THREE.Color( "rgb(20,20,20)"));
+		if(rendererOpts.alpha===false)
+			renderer.setClearColor(new THREE.Color( "rgb(20,20,20,0)"));
 		renderer.setPixelRatio(devicePixelRatio);
 		renderer.sortObjects=false;
 		renderer.physicallyCorrectLights=true;
-		/* renderer.shadowMap.enabled=true;
-		renderer.shadowMap.autoUpdate=true; */
+		renderer.shadowMap.enabled=opts.shadow;
+		renderer.shadowMap.autoUpdate=opts.shadow;
+		/* this.on('beforeRefresh',e=>{
+			renderer.shadowMap.needsUpdate=true;
+		}) */
+		// renderer.shadowMap.type=THREE.BasicShadowMap;
+		// renderer.shadowMap.type=THREE.PCFShadowMap;
+		renderer.shadowMap.type=THREE.PCFSoftShadowMap;
+		// renderer.shadowMap.type=THREE.VSMShadowMap;
+		// console.log(renderer.shadowMap)
 
 		if(!opts.canvas){
 			opts.parent.appendChild(renderer.domElement);
@@ -92,12 +134,12 @@ class itisModelViewer extends EventEmitter{
 		const lightA = new THREE.AmbientLight( 0x404040 ); // soft white light
 		lightA.intensity=8;
 		this.scene.add(lightA);
-		this.defaultLight.push(lightA);
-		const lightD = new THREE.DirectionalLight( 0xffffff, 0.8 );
-		lightD.castShadow=true;
-		lightD.position.set(1,1,1);
+		this.defaultLights.push(lightA);
+		const lightD = new THREE.DirectionalLight( 0xffffff, 1 );
+		this._modifyLightShadow(lightD);
+		lightD.position.set(10,10,10);
 		scene.add(lightD);
-		this.defaultLight.push(lightD);
+		this.defaultLights.push(lightD);
 
 		/* const light = new THREE.DirectionalLight( 0xffffff, 0 );
 		light.name='default_light';
@@ -119,6 +161,10 @@ class itisModelViewer extends EventEmitter{
 			this.defaultScene.remove( cube );
 			this.removeListener('beforeRefresh', rotateCube);
 		});
+		/* create a grid helper */
+		if(opts.gridHelper){
+			scene.add(new THREE.GridHelper(100, 10));
+		}
 		function rotateCube(){
 			cube.rotation.x += 0.01;
 			cube.rotation.y += 0.01;
@@ -160,32 +206,31 @@ class itisModelViewer extends EventEmitter{
 		const camera=this.defaultCamera = new THREE.PerspectiveCamera( 75,this.width / this.height, 0.001, 1000 );
 		camera.position.set(0,0.5,5);
 		camera.lookAt(0,0,0);
-		camera.far=10000000000;
+		camera.far=1000000;
 		this.currentCamera=this.defaultCamera;
 	}
 	initAnimationMixer(scene){
-		const opts=this.opts;
-		if(this.animationMixer){//clear animationMixer
-			this.animationMixer.stopAllAction();
-			this.animationMixer.uncacheClip();
-			this.animationMixer.uncacheRoot();
-			this.animationMixer.uncacheAction();
+		const opts=this.opts,A=this.animationMixer;
+		if(A){//clear animationMixer
+			A.stopAllAction();
+			A.uncacheClip();
+			A.uncacheRoot();
+			A.uncacheAction();
 		}
 		/* mixers */
 		this.animationMixer=new THREE.AnimationMixer(scene);
 		scene.actions=[];
-	}
-	actionsToggle(enabled){
-
+		if(opts.noAnimation)this.animationMixer.timeScale=0;
 	}
 	resize(width,height){
+		this.opts.width=width;
+		this.opts.height=height;
 		if(this.camera){
 			this.camera.aspect=width/height;
 			this.camera.updateProjectionMatrix();
 		}
-		this.opts.width=width;
-		this.opts.height=height;
 		this.renderer.setSize(width,height,true);
+		this.refresh();
 	}
 	_setMouseEvents(){
 		addEvents(this.renderer.domElement,{
@@ -204,13 +249,13 @@ class itisModelViewer extends EventEmitter{
 		//change scale of the scene to fit screen
 		let scale=this.getFitScale(),center=this._center;
 		if(!this.loadedScene)return;
-		this.scene.scale.set(scale,scale,scale);
+		this.loadedScene.scale.set(scale,scale,scale);
 		if(this.opts.focusOnObject){
 			// let sceneMax=this.boundingBox.max;
 			/* this.defaultCamera.position.set(0,sceneMax.y*0.5,sceneMax.z*3);
 			this.defaultCamera.lookAt(center.x,center.y,center.z);
 			this.setCamera(null); */
-			this.loadedScene.position.set(-center.x,-center.y,-center.z);
+			this.loadedScene.position.set(-center.x*scale,-center.y*scale,-center.z*scale);
 		}else{
 			this.loadedScene.position.set(0,0,0);
 		}
@@ -248,8 +293,7 @@ class itisModelViewer extends EventEmitter{
 			}else{
 				throw(new Error('not supported model'));
 			}
-			//traverseVisible
-			scene.traverse(child=>{
+			scene.traverseVisible(child=>{
 				if(child instanceof THREE.Light){
 					if(this.renderer.physicallyCorrectLights){
 						/* if('power' in child)
@@ -258,11 +302,14 @@ class itisModelViewer extends EventEmitter{
 							child.decay=1;
 						// child.intensity*=100;
 					}
-					child.castShadow=true;
+					this._modifyLightShadow(child);
 				}
-				if (child.isMesh) {
+				if (child.isMesh&& this.opts.shadow) {
 					child.castShadow = true;
 					child.receiveShadow = true;
+				}
+				if(child.material&&this.opts.wireframe){
+					child.material.wireframe=true;
 				}
 			});
 			/* convert lights 
@@ -284,6 +331,20 @@ class itisModelViewer extends EventEmitter{
 			console.error( error );
 		});
 	}
+	_modifyLightShadow(light){
+		if(!this.opts.shadow)return;
+		light.castShadow=true;
+		light.bias=0.001*Math.random();
+		light.radius=1.1;
+		light.shadow.mapSize.width = 2048;
+		light.shadow.mapSize.height = 2048;
+		/* light.shadow.camera.left = -20;
+		light.shadow.camera.right = 20;
+		light.shadow.camera.top = 20;
+		light.shadow.camera.bottom = -20; */
+		light.shadow.camera.near = 0.1;
+		light.shadow.camera.far = 200;
+	}
 	setCamera(target,findCameraOnly=true){
 		if(target===null){
 			this.defaultCamera.parent=null;
@@ -301,6 +362,7 @@ class itisModelViewer extends EventEmitter{
 			target.updateProjectionMatrix&&target.updateProjectionMatrix();
 			this.controls.enabled=(this.defaultCamera===target);
 			this.currentCamera=target;
+			return target;
 		}else if(target instanceof THREE.Object3D){
 			target.add(this.defaultCamera);
 			this.setCamera(this.defaultCamera);
@@ -311,6 +373,7 @@ class itisModelViewer extends EventEmitter{
 		if(scene===this.scene){
 			throw(new Error('cannot add scene to it self'));
 		}
+		const opts=this.opts;
 		if(scene instanceof THREE.Object3D){
 			let hasLight=false;
 			// let points=[];
@@ -332,7 +395,13 @@ class itisModelViewer extends EventEmitter{
 					baseQuaternion=new THREE.Quaternion;
 			scene.traverse(child=>{
 				if(child instanceof THREE.Camera)this.cameras.push(child);//get a camera list from the scene
-				else if(child instanceof THREE.Light)hasLight=true;//check if there are lights
+				else if(child instanceof THREE.Light){
+					if(opts.shadow){
+						child.visible=false;
+					}else{
+						hasLight=true;//check if there are lights
+					}
+				}
 				else if (child.isMesh&&child.geometry) {
 					/* if(!child.geometry.boundingBox)
 						console.log(child.geometry.computeBoundingBox());
@@ -347,7 +416,6 @@ class itisModelViewer extends EventEmitter{
 							checkBoundingPoint(arr[i*3],arr[i*3+1],arr[i*3+2],min,max);
 						}
 					}else if(child.geometry.vertices){//[Vector3...]
-						return;
 						for(let v of child.geometry.vertices){
 							checkBoundingPoint(v.x,v.y,v.z,min,max);
 						}
@@ -377,6 +445,8 @@ class itisModelViewer extends EventEmitter{
 			}
 			this._maxDistanceToCenter=farthest;
 			let fitScale=this.getFitScale();
+			sceneMin.multiplyScalar(fitScale);
+			sceneMax.multiplyScalar(fitScale);
 			/* if(this.renderer.physicallyCorrectLights){//apply scale on lights
 				scene.traverse(child=>{
 					if('intensity' in child){
@@ -411,6 +481,7 @@ class itisModelViewer extends EventEmitter{
 				action.play();
 			}
 			this.scene.add(scene);
+			this.scene.add(this.defaultCamera);
 			this.refresh();
 			this.resetView();
 		}else{
@@ -455,8 +526,11 @@ class itisModelViewer extends EventEmitter{
 		}
 	}
 	refresh(callloop=false){
+		if(this.refreshFlag)return;
+		requestAnimationFrame(()=>this.refreshFlag=false);//reset the refresh flag
+		this.refreshFlag=true;
 		this.emit('beforeRefresh');
-		this.animationMixer.update(this.clock.getDelta());
+		this.animationMixer&&this.animationMixer.update(this.clock.getDelta());
 		this.controls.update();
 		if(this.scene&&this.camera)
 			this.renderer.render(this.scene,this.camera);
