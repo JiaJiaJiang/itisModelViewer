@@ -29,6 +29,7 @@ class itisModelViewer extends EventEmitter{
 		this.boundingBox={min:new THREE.Vector3,max:new THREE.Vector3};
 		this.refreshFlag=false;//to prevent multi call of refresh in a frame
 		this.raycaster = new THREE.Raycaster();
+		this.loaded=false;
 		// this.frameCalls=[];
 	}
 	get width(){return this.opts.width;}
@@ -168,6 +169,9 @@ class itisModelViewer extends EventEmitter{
 		function rotateCube(){
 			cube.rotation.x += 0.01;
 			cube.rotation.y += 0.01;
+			if(!this.loaded){
+				requestAnimationFrame(()=>this.refresh());
+			}
 		}
 		this.on('beforeRefresh',rotateCube);
 		// this.scene.add(this.defaultCamera);

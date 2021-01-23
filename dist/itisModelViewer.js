@@ -14541,7 +14541,8 @@ class itisModelViewer extends EventEmitter {
     };
     this.refreshFlag = false; //to prevent multi call of refresh in a frame
 
-    this.raycaster = new THREE.Raycaster(); // this.frameCalls=[];
+    this.raycaster = new THREE.Raycaster();
+    this.loaded = false; // this.frameCalls=[];
   }
 
   get width() {
@@ -14715,6 +14716,10 @@ class itisModelViewer extends EventEmitter {
     function rotateCube() {
       cube.rotation.x += 0.01;
       cube.rotation.y += 0.01;
+
+      if (!this.loaded) {
+        requestAnimationFrame(() => this.refresh());
+      }
     }
 
     this.on('beforeRefresh', rotateCube); // this.scene.add(this.defaultCamera);
