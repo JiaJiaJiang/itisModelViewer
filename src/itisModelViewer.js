@@ -25,12 +25,13 @@ class itisModelViewer extends EventEmitter{
 		this._center=THREE.Vector3;
 		this.lastInteractive=0;
 		this.animatingTime=100;
+		this.boundingBox={min:new THREE.Vector3,max:new THREE.Vector3};
 		// this.frameCalls=[];
 	}
 	get width(){return this.opts.width;}
-	set width(v){this.opts.width=v;}
+	// set width(v){this.opts.width=v;}
 	get height(){return this.opts.height;}
-	set height(v){this.opts.height=v;}
+	// set height(v){this.opts.height=v;}
 	get camera(){return this.currentCamera;}
 	get scene(){return this.defaultScene;}
 	get animating(){return Date.now()-this.lastInteractive<this.animatingTime;}
@@ -46,8 +47,8 @@ class itisModelViewer extends EventEmitter{
 			focusOnObject:true,//move the object to center
 		},opts);
 		
-		this.width=opts.width||opts.canvas?.width||300;
-		this.height=opts.height||opts.canvas?.height||300;
+		opts.width||(opts.width=opts.canvas?.width||300);
+		opts.height||(opts.height=opts.canvas?.height||300);
 
 		this.initRenderer();
 		this.initDefaultCamera();
@@ -75,8 +76,8 @@ class itisModelViewer extends EventEmitter{
 		renderer.setPixelRatio(devicePixelRatio);
 		renderer.sortObjects=false;
 		renderer.physicallyCorrectLights=true;
-		// renderer.shadowMap.enabled=true;
-		// renderer.shadowMap.autoUpdate=true;
+		/* renderer.shadowMap.enabled=true;
+		renderer.shadowMap.autoUpdate=true; */
 
 		if(!opts.canvas){
 			opts.parent.appendChild(renderer.domElement);
@@ -109,7 +110,6 @@ class itisModelViewer extends EventEmitter{
 				cube.geometry.dispose();
 				cube.material.dispose();
 				this.defaultScene.remove( cube );
-				console.log(cube)
 				this.removeListener('beforeRefresh', rotateCube);
 			});
 			function rotateCube(){
@@ -153,6 +153,7 @@ class itisModelViewer extends EventEmitter{
 		const camera=this.defaultCamera = new THREE.PerspectiveCamera( 75,this.width / this.height, 0.001, 1000 );
 		camera.position.set(0,0.5,5);
 		camera.lookAt(0,0,0);
+		camera.far=10000000000;
 		this.currentCamera=this.defaultCamera;
 	}
 	initAnimationMixer(){
@@ -165,6 +166,8 @@ class itisModelViewer extends EventEmitter{
 			this.camera.aspect=width/height;
 			this.camera.updateProjectionMatrix();
 		}
+		this.opts.width=width;
+		this.opts.height=height;
 		this.renderer.setSize(width,height,true);
 	}
 	_setMouseEvents(){
@@ -184,9 +187,13 @@ class itisModelViewer extends EventEmitter{
 		//change scale of the scene to fit screen
 		let scale=this.getFitScale(),center=this._center;
 		if(!this.loadedScene)return;
-		this.loadedScene.scale.set(scale,scale,scale);
+		this.scene.scale.set(scale,scale,scale);
 		if(this.opts.focusOnObject){
-			this.loadedScene.position.set(-center.x*scale,-center.z*scale,-center.y*scale);
+			// let sceneMax=this.boundingBox.max;
+			/* this.defaultCamera.position.set(0,sceneMax.y*0.5,sceneMax.z*3);
+			this.defaultCamera.lookAt(center.x,center.y,center.z);
+			this.setCamera(null); */
+			this.loadedScene.position.set(-center.x,-center.y,-center.z);
 		}else{
 			this.loadedScene.position.set(0,0,0);
 		}
@@ -224,13 +231,18 @@ class itisModelViewer extends EventEmitter{
 			}else{
 				throw(new Error('not supported model'));
 			}
+			//traverseVisible
 			scene.traverse(child=>{
-				/* if(child instanceof THREE.Light){
-					if('power' in child)
-						child.power*=child.intensity;
-					// child.intensity*=100;
+				if(child instanceof THREE.Light){
+					if(this.renderer.physicallyCorrectLights){
+						/* if('power' in child)
+							child.power*=child.intensity; */
+						if('decay' in child)
+							child.decay=1;
+						// child.intensity*=100;
+					}
 					child.castShadow=true;
-				} */
+				}
 				if (child.isMesh) {
 					child.castShadow = true;
 					child.receiveShadow = true;
@@ -248,7 +260,6 @@ class itisModelViewer extends EventEmitter{
 			this.setScene(scene);
 			this.emit('fileLoaded');
 		},xhr=>{
-			console.log(xhr)
 			this.emit('fileLoadingProgress',xhr.loaded,xhr.total);
 			// console.log(xhr.loaded, ' loaded' );
 		},error=>{
@@ -271,12 +282,12 @@ class itisModelViewer extends EventEmitter{
 		}else if(target instanceof THREE.Camera){
 			if('aspect' in target)target.aspect=this.width/this.height;
 			target.updateProjectionMatrix&&target.updateProjectionMatrix();
-			this.controls.enabled=this.defaultCamera===target;
+			this.controls.enabled=(this.defaultCamera===target);
 			this.currentCamera=target;
 		}else if(target instanceof THREE.Object3D){
+			target.add(this.defaultCamera);
 			this.setCamera(this.defaultCamera);
-			/* target.add(this.defaultCamera);
-			this.currentCamera=this.defaultCamera; */
+			// this.currentCamera=this.defaultCamera;
 		}
 	}
 	setScene(scene){
@@ -285,43 +296,83 @@ class itisModelViewer extends EventEmitter{
 		}
 		if(scene instanceof THREE.Object3D){
 			let hasLight=false;
-			let points=[];
+			// let points=[];
 			this.cameras.length=0;
+			let sceneMin=this.boundingBox.min,sceneMax=this.boundingBox.max;
+			sceneMin.set(0,0,0);
+			sceneMax.set(0,0,0);
+			function checkBoundingPoint(x,y,z,min,max){
+				if(min.x>x)min.x=x;
+				if(min.y>y)min.y=y;
+				if(min.z>z)min.z=z;
+				if(max.x<x)max.x=x;
+				if(max.y<y)max.y=y;
+				if(max.z<z)max.z=z;
+			}
 			//find center of the model and check if a default light is needed
+			let basePosition=new THREE.Vector3,
+					baseScale=new THREE.Vector3,
+					baseQuaternion=new THREE.Quaternion;
 			scene.traverse(child=>{
 				if(child instanceof THREE.Camera)this.cameras.push(child);//get a camera list from the scene
 				else if(child instanceof THREE.Light)hasLight=true;//check if there are lights
 				else if (child.isMesh&&child.geometry) {
-					if(!child.geometry.boundingBox)
-					console.log(child.geometry.computeBoundingBox());
-					let {min,max}=child.geometry.boundingBox;
-					points.push(min);
-					points.push(max);
+					/* if(!child.geometry.boundingBox)
+						console.log(child.geometry.computeBoundingBox());
+					let {min,max}=child.geometry.boundingBox; */
+					let min=new THREE.Vector3,max=new THREE.Vector3;
+					/* console.log(child)*/
+					let arr=child.geometry.attributes.position.array;//[x,y,z...]
+					if(arr){
+						let count=child.geometry.attributes.position.count;
+						if(count<2)return;
+						for(let i=0;i<count;i++){
+							checkBoundingPoint(arr[i*3],arr[i*3+1],arr[i*3+2],min,max);
+						}
+					}else if(child.geometry.vertices){//[Vector3...]
+						return;
+						for(let v of child.geometry.vertices){
+							checkBoundingPoint(v.x,v.y,v.z,min,max);
+						}
+					}else{
+						return;
+					}
+					child.getWorldPosition(basePosition),
+					child.getWorldScale(baseScale),
+					child.getWorldQuaternion(baseQuaternion);
+					min.applyQuaternion(baseQuaternion).multiply(baseScale).add(basePosition);
+					max.applyQuaternion(baseQuaternion).multiply(baseScale).add(basePosition);
+					checkBoundingPoint(min.x,min.y,min.z,sceneMin,sceneMax);
+					checkBoundingPoint(max.x,max.y,max.z,sceneMin,sceneMax);
+					
 				}
 			});
 			this.scene.getObjectByName('default_light').visible=!hasLight;//show default light if there is no light
+			let points=[sceneMin,sceneMax];
 			let center=this._center=itisModelViewer.calcCenter(points);
 			console.log('center',center)
 			let farthest=0;
 			//find the farthest point from the center to get a scale
+			for(let p of points){
+				let dis=center.distanceTo(p);
+				if(dis>farthest)farthest=dis;
+			}
+			this._maxDistanceToCenter=farthest;
+			let fitScale=this.getFitScale();
 			scene.traverse(child=>{
-				if (child.isMesh&&child.geometry) {
+				if(this.renderer.physicallyCorrectLights){
+					if('intensity' in child){
+						child.intensity*=fitScale;
+					}
+				}
+				/* if (child.isMesh&&child.geometry) {
 					let {min,max}=child.geometry.boundingBox;
 					let dis=center.distanceTo(min);
 					if(dis>farthest)farthest=dis;
 					dis=center.distanceTo(max);
 					if(dis>farthest)farthest=dis;
-				}
+				} */
 			});
-			this._maxDistanceToCenter=farthest;
-			//change scale of the scene to fit screen
-			/* let scale=this.getFitScale();
-			scene.scale.set(scale,scale,scale);
-			if(this.opts.focusOnObject){
-				scene.position.set(-center.x*scale,-center.z*scale,-center.y*scale);
-			}else{
-				scene.position.set(0,0,0);
-			} */
 			//remove previous scene
 			for(let child of this.scene.children){
 				if(child===this.loadedScene){
@@ -405,7 +456,7 @@ class itisModelViewer extends EventEmitter{
 		this.frameCalls.push(cb);
 	} */
 	static calcCenter(points){
-		console.log(points)
+		// console.log(points)
 		let x=0,y=0,z=0,L=points.length;
 		for(let p of points){
 			x+=p.x;
