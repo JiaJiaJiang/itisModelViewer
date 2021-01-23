@@ -13,9 +13,10 @@ class itisModelViewer extends EventEmitter{
 		this.opts=null;//save the options
 		this.renderer=null;
 		this.clock=new THREE.Clock();//clock for animation
-		this.animationMixerList=null;
+		this.animationMixer=null;
 		this.defaultCamera=null;//for view of scene's transform
 		this.defaultScene=null;//loaded when no url specified
+		this.defaultLights=[];
 		this.loadedScene=null;//loaded scene from fils
 		this.currentCamera=null;//current using camera
 		// this.currentScene=null;//current using scene
@@ -34,7 +35,7 @@ class itisModelViewer extends EventEmitter{
 	// set height(v){this.opts.height=v;}
 	get camera(){return this.currentCamera;}
 	get scene(){return this.defaultScene;}
-	get animating(){return Date.now()-this.lastInteractive<this.animatingTime;}
+	get animating(){return (Date.now()-this.lastInteractive<this.animatingTime)||(this.animationMixer.timeScale!==0&&this.loadedScene.actions?.length!==0);}
 	constructor(url,opts){
 		super();
 		this._vars();
@@ -56,7 +57,7 @@ class itisModelViewer extends EventEmitter{
 			this.loadFile(url);
 		}
 		this.initControls();
-		this.initAnimationMixer();
+		// this.initAnimationMixer();
 		this.initDefaultScene();
 	}
 	initRenderer(){
@@ -88,10 +89,16 @@ class itisModelViewer extends EventEmitter{
 		/* create default scene */
 		const scene=this.defaultScene = new THREE.Scene();
 		/* create a light */
-		const alight = new THREE.AmbientLight( 0x404040 ); // soft white light
-		alight.name='default_light';
-		alight.intensity=4;
-		this.scene.add(alight);
+		const lightA = new THREE.AmbientLight( 0x404040 ); // soft white light
+		lightA.intensity=8;
+		this.scene.add(lightA);
+		this.defaultLight.push(lightA);
+		const lightD = new THREE.DirectionalLight( 0xffffff, 0.8 );
+		lightD.castShadow=true;
+		lightD.position.set(1,1,1);
+		scene.add(lightD);
+		this.defaultLight.push(lightD);
+
 		/* const light = new THREE.DirectionalLight( 0xffffff, 0 );
 		light.name='default_light';
 		light.castShadow=true;
@@ -103,20 +110,20 @@ class itisModelViewer extends EventEmitter{
 				hemiLight.position.set( 0, 50, 0 );
 				this.scene.add( hemiLight ); */
 
-			/* create a cube */
-			const cube = new THREE.Mesh( new THREE.BoxGeometry(), new THREE.MeshPhongMaterial( { color: 0x66ccff } ) );
-			this.defaultScene.add( cube );
-			this.once('fileLoaded',()=>{
-				cube.geometry.dispose();
-				cube.material.dispose();
-				this.defaultScene.remove( cube );
-				this.removeListener('beforeRefresh', rotateCube);
-			});
-			function rotateCube(){
-				cube.rotation.x += 0.01;
-				cube.rotation.y += 0.01;
-			}
-			this.on('beforeRefresh',rotateCube);
+		/* create a cube */
+		const cube = new THREE.Mesh( new THREE.BoxGeometry(), new THREE.MeshPhongMaterial( { color: 0x66ccff } ) );
+		this.defaultScene.add( cube );
+		this.once('fileLoaded',()=>{
+			cube.geometry.dispose();
+			cube.material.dispose();
+			this.defaultScene.remove( cube );
+			this.removeListener('beforeRefresh', rotateCube);
+		});
+		function rotateCube(){
+			cube.rotation.x += 0.01;
+			cube.rotation.y += 0.01;
+		}
+		this.on('beforeRefresh',rotateCube);
 		// this.scene.add(this.defaultCamera);
 		this.setCamera(this.defaultCamera);
 		// this.setScene(scene);
@@ -156,10 +163,20 @@ class itisModelViewer extends EventEmitter{
 		camera.far=10000000000;
 		this.currentCamera=this.defaultCamera;
 	}
-	initAnimationMixer(){
+	initAnimationMixer(scene){
 		const opts=this.opts;
+		if(this.animationMixer){//clear animationMixer
+			this.animationMixer.stopAllAction();
+			this.animationMixer.uncacheClip();
+			this.animationMixer.uncacheRoot();
+			this.animationMixer.uncacheAction();
+		}
 		/* mixers */
-		this.animationMixerList=[];
+		this.animationMixer=new THREE.AnimationMixer(scene);
+		scene.actions=[];
+	}
+	actionsToggle(enabled){
+
 	}
 	resize(width,height){
 		if(this.camera){
@@ -344,52 +361,57 @@ class itisModelViewer extends EventEmitter{
 					max.applyQuaternion(baseQuaternion).multiply(baseScale).add(basePosition);
 					checkBoundingPoint(min.x,min.y,min.z,sceneMin,sceneMax);
 					checkBoundingPoint(max.x,max.y,max.z,sceneMin,sceneMax);
-					
 				}
 			});
-			this.scene.getObjectByName('default_light').visible=!hasLight;//show default light if there is no light
+			for(let l of this.defaultLights){//show default lights if there is no light in the scene
+				l.visible=!hasLight;
+			}
 			let points=[sceneMin,sceneMax];
 			let center=this._center=itisModelViewer.calcCenter(points);
 			console.log('center',center)
-			let farthest=0;
 			//find the farthest point from the center to get a scale
+			let farthest=0;
 			for(let p of points){
 				let dis=center.distanceTo(p);
 				if(dis>farthest)farthest=dis;
 			}
 			this._maxDistanceToCenter=farthest;
 			let fitScale=this.getFitScale();
-			scene.traverse(child=>{
-				if(this.renderer.physicallyCorrectLights){
+			/* if(this.renderer.physicallyCorrectLights){//apply scale on lights
+				scene.traverse(child=>{
 					if('intensity' in child){
 						child.intensity*=fitScale;
 					}
-				}
-				/* if (child.isMesh&&child.geometry) {
-					let {min,max}=child.geometry.boundingBox;
-					let dis=center.distanceTo(min);
-					if(dis>farthest)farthest=dis;
-					dis=center.distanceTo(max);
-					if(dis>farthest)farthest=dis;
-				} */
-			});
+				});
+			} */
 			//remove previous scene
+			if(this.loadedScene){
+				let ls=this.loadedScene;
+				ls.parent.remove(ls);
+				if(ls.actions){
+					ls.actions.length=0;
+				}
+			}
 			for(let child of this.scene.children){
 				if(child===this.loadedScene){
 					// child.loadedScene=false;
+					if(child)
 					child.parent.remove(child);
 				}
 			}
 			this.loadedScene=scene;
 			// scene.loadedScene=true;
 			// animation
-			scene.mixer = new THREE.AnimationMixer(scene);
-			this.animationMixerList.push(scene.mixer);
+			this.initAnimationMixer(scene);
+			// scene.mixer = new THREE.AnimationMixer(scene);
+			// this.animationMixer.push(scene.mixer);
 			for(let ani of scene.animations){
-				const action = scene.mixer.clipAction(ani);
+				const action = this.animationMixer.clipAction(ani);
+				scene.actions.push(action);
 				action.play();
 			}
 			this.scene.add(scene);
+			this.refresh();
 			this.resetView();
 		}else{
 			throw(new TypeError('scene must be an instance of THREE.Object3D'));
@@ -434,9 +456,7 @@ class itisModelViewer extends EventEmitter{
 	}
 	refresh(callloop=false){
 		this.emit('beforeRefresh');
-		for(let mixer of this.animationMixerList){
-			mixer.update(this.clock.getDelta());
-		}
+		this.animationMixer.update(this.clock.getDelta());
 		this.controls.update();
 		if(this.scene&&this.camera)
 			this.renderer.render(this.scene,this.camera);

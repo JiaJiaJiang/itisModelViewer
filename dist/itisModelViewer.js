@@ -14518,11 +14518,12 @@ class itisModelViewer extends EventEmitter {
     this.renderer = null;
     this.clock = new THREE.Clock(); //clock for animation
 
-    this.animationMixerList = null;
+    this.animationMixer = null;
     this.defaultCamera = null; //for view of scene's transform
 
     this.defaultScene = null; //loaded when no url specified
 
+    this.defaultLights = [];
     this.loadedScene = null; //loaded scene from fils
 
     this.currentCamera = null; //current using camera
@@ -14559,7 +14560,7 @@ class itisModelViewer extends EventEmitter {
   }
 
   get animating() {
-    return (0, _now.default)() - this.lastInteractive < this.animatingTime;
+    return (0, _now.default)() - this.lastInteractive < this.animatingTime || this.animationMixer.timeScale !== 0 && this.loadedScene.actions?.length !== 0;
   }
 
   constructor(url, opts) {
@@ -14585,8 +14586,8 @@ class itisModelViewer extends EventEmitter {
       this.loadFile(url);
     }
 
-    this.initControls();
-    this.initAnimationMixer();
+    this.initControls(); // this.initAnimationMixer();
+
     this.initDefaultScene();
   }
 
@@ -14608,8 +14609,8 @@ class itisModelViewer extends EventEmitter {
     renderer.setPixelRatio(devicePixelRatio);
     renderer.sortObjects = false;
     renderer.physicallyCorrectLights = true;
-    /* renderer.shadowMap.enabled=true;
-    renderer.shadowMap.autoUpdate=true; */
+    renderer.shadowMap.enabled = true;
+    renderer.shadowMap.autoUpdate = true;
 
     if (!opts.canvas) {
       opts.parent.appendChild(renderer.domElement);
@@ -14625,11 +14626,17 @@ class itisModelViewer extends EventEmitter {
     const scene = this.defaultScene = new THREE.Scene();
     /* create a light */
 
-    const alight = new THREE.AmbientLight(0x404040); // soft white light
+    const lightA = this.defaultLight = new THREE.AmbientLight(0x404040); // soft white light
 
-    alight.name = 'default_light';
-    alight.intensity = 4;
-    this.scene.add(alight);
+    lightA.name = 'default_light';
+    lightA.intensity = 8;
+    this.scene.add(lightA);
+    this.defaultLight.add(lightA);
+    const lightD = new THREE.DirectionalLight(0xffffff, 0.8);
+    lightD.castShadow = true;
+    lightD.position.set(1, 1, 1);
+    scene.add(lightD);
+    this.defaultLight.add(lightD);
     /* const light = new THREE.DirectionalLight( 0xffffff, 0 );
     light.name='default_light';
     light.castShadow=true;
@@ -14701,12 +14708,24 @@ class itisModelViewer extends EventEmitter {
     this.currentCamera = this.defaultCamera;
   }
 
-  initAnimationMixer() {
+  initAnimationMixer(scene) {
     const opts = this.opts;
+
+    if (this.animationMixer) {
+      //clear animationMixer
+      this.animationMixer.stopAllAction();
+      this.animationMixer.uncacheClip();
+      this.animationMixer.uncacheRoot();
+      this.animationMixer.uncacheAction();
+    }
     /* mixers */
 
-    this.animationMixerList = [];
+
+    this.animationMixer = new THREE.AnimationMixer(scene);
+    scene.actions = [];
   }
+
+  actionsToggle(enabled) {}
 
   resize(width, height) {
     if (this.camera) {
@@ -14928,8 +14947,9 @@ class itisModelViewer extends EventEmitter {
 
       let points = [sceneMin, sceneMax];
       let center = this._center = itisModelViewer.calcCenter(points);
-      console.log('center', center);
-      let farthest = 0; //find the farthest point from the center to get a scale
+      console.log('center', center); //find the farthest point from the center to get a scale
+
+      let farthest = 0;
 
       for (let p of points) {
         let dis = center.distanceTo(p);
@@ -14938,41 +14958,45 @@ class itisModelViewer extends EventEmitter {
 
       this._maxDistanceToCenter = farthest;
       let fitScale = this.getFitScale();
-      scene.traverse(child => {
-        if (this.renderer.physicallyCorrectLights) {
-          if ('intensity' in child) {
-            child.intensity *= fitScale;
-          }
-        }
-        /* if (child.isMesh&&child.geometry) {
-        	let {min,max}=child.geometry.boundingBox;
-        	let dis=center.distanceTo(min);
-        	if(dis>farthest)farthest=dis;
-        	dis=center.distanceTo(max);
-        	if(dis>farthest)farthest=dis;
-        } */
+      /* if(this.renderer.physicallyCorrectLights){//apply scale on lights
+      	scene.traverse(child=>{
+      		if('intensity' in child){
+      			child.intensity*=fitScale;
+      		}
+      	});
+      } */
+      //remove previous scene
 
-      }); //remove previous scene
+      if (this.loadedScene) {
+        let ls = this.loadedScene;
+        ls.parent.remove(ls);
+
+        if (ls.actions) {
+          ls.actions.length = 0;
+        }
+      }
 
       for (let child of this.scene.children) {
         if (child === this.loadedScene) {
           // child.loadedScene=false;
-          child.parent.remove(child);
+          if (child) child.parent.remove(child);
         }
       }
 
       this.loadedScene = scene; // scene.loadedScene=true;
       // animation
 
-      scene.mixer = new THREE.AnimationMixer(scene);
-      this.animationMixerList.push(scene.mixer);
+      this.initAnimationMixer(scene); // scene.mixer = new THREE.AnimationMixer(scene);
+      // this.animationMixer.push(scene.mixer);
 
       for (let ani of scene.animations) {
-        const action = scene.mixer.clipAction(ani);
+        const action = this.animationMixer.clipAction(ani);
+        scene.actions.push(action);
         action.play();
       }
 
       this.scene.add(scene);
+      this.refresh();
       this.resetView();
     } else {
       throw new TypeError('scene must be an instance of THREE.Object3D');
@@ -15022,11 +15046,7 @@ class itisModelViewer extends EventEmitter {
 
   refresh(callloop = false) {
     this.emit('beforeRefresh');
-
-    for (let mixer of this.animationMixerList) {
-      mixer.update(this.clock.getDelta());
-    }
-
+    this.animationMixer.update(this.clock.getDelta());
     this.controls.update();
     if (this.scene && this.camera) this.renderer.render(this.scene, this.camera);
     this.emit('aftereRefresh');
