@@ -30,7 +30,13 @@ const viewer=new itisModelViewer(
 		wireframe:('wireframe' in pageArgs),//show all materials as wireframe
 		noAnimation:('noAnimation' in pageArgs),//do not play animations in the loaded file
 		shadow:('shadow' in pageArgs),//show shadow of the models. If turn on, only default lights will be visabled because it's hard to set all lights correctly
-		meshDebug:('meshDebug' in pageArgs),//
+		meshDebug:('meshDebug' in pageArgs),//shou mesh as wireframe while mouse moves over it
+		defocus:('defocus' in pageArgs),//turn on defocus effect
+		//set background color, it cannot be loaded from a model file so you can set it manually.
+		//if rendererOpts.alpha exists, this option will not take effect
+		//supported color: https://threejs.org/docs/#api/math/Color
+		bgColor:pageArgs.bgColor,
+		
 		rendererOpts:{
 			precision:pageArgs.precision,//precision of shaders:lowp,mediump,highp
 			antialias:!('antialiasOff' in pageArgs),//have this opt to turn off antialias

@@ -71,7 +71,7 @@ function transjs(name,cover=90){
 			]
 		}
 	)/* .transform(
-		'uglifyify', { global: true }
+		'tinyify', { global: true }
 	) */
 	.bundle()
 	.pipe(source(`./${name}`))
