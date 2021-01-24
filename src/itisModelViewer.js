@@ -366,8 +366,8 @@ class itisModelViewer extends EventEmitter{
 					this._modifyLightShadow(child);
 				}
 				if (child.isMesh&& this.opts.shadow) {
-					child.castShadow = true;
-					child.receiveShadow = true;
+					child.castShadow = this.opts.shadow;
+					child.receiveShadow = this.opts.shadow;
 				}
 				if(child.material&&this.opts.wireframe){
 					child.material.wireframe=true;
@@ -393,9 +393,9 @@ class itisModelViewer extends EventEmitter{
 		});
 	}
 	_modifyLightShadow(light){
+		light.castShadow=this.opts.shadow;
 		if(!this.opts.shadow)return;
-		light.castShadow=true;
-		light.bias=0.001*Math.random();
+		light.bias=0.001;
 		light.radius=1.1;
 		light.shadow.mapSize.width = 2048;
 		light.shadow.mapSize.height = 2048;
