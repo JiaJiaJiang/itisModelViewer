@@ -127,7 +127,7 @@ class itisModelViewer extends EventEmitter{
 		}
 		if(rendererOpts.alpha===false)
 			renderer.setClearColor(new THREE.Color( opts.bgColor||"rgb(20,20,20,0)"));
-		renderer.setPixelRatio(devicePixelRatio);
+		// renderer.setPixelRatio(devicePixelRatio);
 		renderer.sortObjects=false;
 		renderer.toneMapping=THREE.ACESFilmicToneMapping;
 		renderer.toneMappingExposure=1.3;
@@ -286,14 +286,11 @@ class itisModelViewer extends EventEmitter{
 	_setMouseEvents(){
 		addEvents(this.renderer.domElement,{
 			'pointerdown':e=>{
-				console.log('pointerdown')
 				this.controlChanged=false;
 			},
 			'pointerup':e=>{
-				console.log('pointerdown')
 				if(this.opts.defocus){
 					if(!this.controlChanged){
-						console.log('click',e.offsetX,e.offsetY)
 						this.updatebokehPass(e.offsetX,e.offsetY);
 					}
 				}
