@@ -16013,7 +16013,7 @@ class itisModelViewer extends EventEmitter {
 
     const defaultRendererOpts = {
       canvas: opts.canvas,
-      antialias: devicePixelRatio <= 1,
+      antialias: true,
       alpha: false,
       precision: 'highp',
       logarithmicDepthBuffer: true
