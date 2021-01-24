@@ -23,7 +23,7 @@ function addEvents(target,events){
 	if(!Array.isArray(target))target=[target];
 	target.forEach(function(t){
 		for(let e in events)
-			t.addEventListener(e,events[e]);
+			t.addEventListener(e,events[e],true);
 	});
 }
 

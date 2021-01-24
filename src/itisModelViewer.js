@@ -32,6 +32,7 @@ class itisModelViewer extends EventEmitter{
 		this.refreshFlag=false;//to prevent multi call of refresh in a frame
 		this.raycaster = new THREE.Raycaster();
 		this.loaded=false;
+		this.controlChanged=false;
 		this.postprocessing={
 			composer:null,
 			renderPass:null,
@@ -111,7 +112,7 @@ class itisModelViewer extends EventEmitter{
 		/* create a renderer */
 		const defaultRendererOpts={
 			canvas:opts.canvas,
-			antialias:true,
+			antialias:devicePixelRatio<=1,
 			alpha:false,
 			precision:'highp',
 			logarithmicDepthBuffer:true,
@@ -126,7 +127,7 @@ class itisModelViewer extends EventEmitter{
 		}
 		if(rendererOpts.alpha===false)
 			renderer.setClearColor(new THREE.Color( opts.bgColor||"rgb(20,20,20,0)"));
-		// renderer.setPixelRatio(devicePixelRatio);
+		renderer.setPixelRatio(devicePixelRatio);
 		renderer.sortObjects=false;
 		renderer.toneMapping=THREE.ACESFilmicToneMapping;
 		renderer.toneMappingExposure=1.3;
@@ -154,6 +155,8 @@ class itisModelViewer extends EventEmitter{
 			width: this.width,
 			height:this.height,
 		} );
+		// composer.setPixelRatio(devicePixelRatio*2);
+		// composer.setPixelRatio(devicePixelRatio*2);
 		composer.addPass(rP);
 		composer.addPass(bP);
 	}
@@ -222,12 +225,13 @@ class itisModelViewer extends EventEmitter{
 		controls.zoomSpeed=0.4;
 		controls.saveState();
 		controls.addEventListener('change',e=>{
+			this.controlChanged=true;
 			if(!this.animating)
 				requestAnimationFrame(()=>this.refresh(true));
 			this.lastInteractive=Date.now();
 		});
 		controls.addEventListener('end',e=>{
-			if(this.opts.defocus){
+			if(this.opts.defocus&&this.controlChanged){
 				this.updatebokehPass();
 			}
 		});
@@ -236,6 +240,7 @@ class itisModelViewer extends EventEmitter{
 		});
 	}
 	updatebokehPass(x=this.width/2,y=this.height/2){
+		console.log('update',x,y)
 		let list=this.objectsAt(x,y);
 		if(list.length){
 			this.postprocessing.bokehPass.uniforms[ "focus" ].value=list[0].distance;
@@ -279,18 +284,19 @@ class itisModelViewer extends EventEmitter{
 		this.refresh();
 	}
 	_setMouseEvents(){
-		let movedAfterPress=false;
 		addEvents(this.renderer.domElement,{
-			'click':e=>{
-				if(this.opts.defocus&&!movedAfterPress){
-					this.updatebokehPass(e.offsetX,e.offsetY);
+			'pointerdown':e=>{
+				console.log('pointerdown')
+				this.controlChanged=false;
+			},
+			'pointerup':e=>{
+				console.log('pointerdown')
+				if(this.opts.defocus){
+					if(!this.controlChanged){
+						console.log('click',e.offsetX,e.offsetY)
+						this.updatebokehPass(e.offsetX,e.offsetY);
+					}
 				}
-			},
-			'mousedown':e=>{
-				movedAfterPress=false;
-			},
-			'mousemove':e=>{
-				movedAfterPress=true;
 			},
 			/* 'wheel':e=>{//scale
 				const S=this.scene;

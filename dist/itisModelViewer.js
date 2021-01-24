@@ -15780,7 +15780,7 @@ function enableMouseDrag() {
 function addEvents(target, events) {
   if (!(0, _isArray.default)(target)) target = [target];
   (0, _forEach.default)(target).call(target, function (t) {
-    for (let e in events) t.addEventListener(e, events[e]);
+    for (let e in events) t.addEventListener(e, events[e], true);
   });
 }
 
@@ -15907,6 +15907,7 @@ class itisModelViewer extends EventEmitter {
 
     this.raycaster = new THREE.Raycaster();
     this.loaded = false;
+    this.controlChanged = false;
     this.postprocessing = {
       composer: null,
       renderPass: null,
@@ -16012,7 +16013,7 @@ class itisModelViewer extends EventEmitter {
 
     const defaultRendererOpts = {
       canvas: opts.canvas,
-      antialias: true,
+      antialias: devicePixelRatio <= 1,
       alpha: false,
       precision: 'highp',
       logarithmicDepthBuffer: true
@@ -16026,8 +16027,8 @@ class itisModelViewer extends EventEmitter {
       opts.bgColor = Number(opts.bgColor);
     }
 
-    if (rendererOpts.alpha === false) renderer.setClearColor(new THREE.Color(opts.bgColor || "rgb(20,20,20,0)")); // renderer.setPixelRatio(devicePixelRatio);
-
+    if (rendererOpts.alpha === false) renderer.setClearColor(new THREE.Color(opts.bgColor || "rgb(20,20,20,0)"));
+    renderer.setPixelRatio(devicePixelRatio);
     renderer.sortObjects = false;
     renderer.toneMapping = THREE.ACESFilmicToneMapping;
     renderer.toneMappingExposure = 1.3;
@@ -16053,7 +16054,9 @@ class itisModelViewer extends EventEmitter {
       maxblur: bOpts.maxblur,
       width: this.width,
       height: this.height
-    });
+    }); // composer.setPixelRatio(devicePixelRatio*2);
+    // composer.setPixelRatio(devicePixelRatio*2);
+
     composer.addPass(rP);
     composer.addPass(bP);
   }
@@ -16138,11 +16141,12 @@ class itisModelViewer extends EventEmitter {
     controls.zoomSpeed = 0.4;
     controls.saveState();
     controls.addEventListener('change', e => {
+      this.controlChanged = true;
       if (!this.animating) requestAnimationFrame(() => this.refresh(true));
       this.lastInteractive = (0, _now.default)();
     });
     controls.addEventListener('end', e => {
-      if (this.opts.defocus) {
+      if (this.opts.defocus && this.controlChanged) {
         this.updatebokehPass();
       }
     });
@@ -16152,8 +16156,8 @@ class itisModelViewer extends EventEmitter {
   }
 
   updatebokehPass(x = this.width / 2, y = this.height / 2) {
+    console.log('update', x, y);
     let list = this.objectsAt(x, y);
-    console.log(list[0]?.distance);
 
     if (list.length) {
       this.postprocessing.bokehPass.uniforms["focus"].value = list[0].distance;
@@ -16209,18 +16213,20 @@ class itisModelViewer extends EventEmitter {
   }
 
   _setMouseEvents() {
-    let movedAfterPress = false;
     (0, _eventUtils.addEvents)(this.renderer.domElement, {
-      'click': e => {
-        if (this.opts.defocus && !movedAfterPress) {
-          this.updatebokehPass(e.offsetX, e.offsetY);
+      'pointerdown': e => {
+        console.log('pointerdown');
+        this.controlChanged = false;
+      },
+      'pointerup': e => {
+        console.log('pointerdown');
+
+        if (this.opts.defocus) {
+          if (!this.controlChanged) {
+            console.log('click', e.offsetX, e.offsetY);
+            this.updatebokehPass(e.offsetX, e.offsetY);
+          }
         }
-      },
-      'mousedown': e => {
-        movedAfterPress = false;
-      },
-      'mousemove': e => {
-        movedAfterPress = true;
       },
 
       /* 'wheel':e=>{//scale
