@@ -280,7 +280,7 @@ class itisModelViewer extends EventEmitter{
 			this.camera.updateProjectionMatrix();
 		}
 		this.renderer.setSize(width,height,true);
-		this.postprocessing.composer.setSize(width,height);
+		if(this.postprocessing.composer)this.postprocessing.composer.setSize(width,height);
 		this.refresh();
 	}
 	_setMouseEvents(){
