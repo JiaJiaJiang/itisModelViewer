@@ -1,38 +1,55 @@
 (function(){function r(e,n,t){function o(i,f){if(!n[i]){if(!e[i]){var c="function"==typeof require&&require;if(!f&&c)return c(i,!0);if(u)return u(i,!0);var a=new Error("Cannot find module '"+i+"'");throw a.code="MODULE_NOT_FOUND",a}var p=n[i]={exports:{}};e[i][0].call(p.exports,function(r){var n=e[i][1][r];return o(n||r)},p,p.exports,r,e,n,t)}return n[i].exports}for(var u="function"==typeof require&&require,i=0;i<t.length;i++)o(t[i]);return o}return r})()({1:[function(require,module,exports){
 module.exports = require("core-js-pure/stable/array/is-array");
-},{"core-js-pure/stable/array/is-array":90}],2:[function(require,module,exports){
+},{"core-js-pure/stable/array/is-array":114}],2:[function(require,module,exports){
 module.exports = require("core-js-pure/stable/date/now");
-},{"core-js-pure/stable/date/now":92}],3:[function(require,module,exports){
+},{"core-js-pure/stable/date/now":116}],3:[function(require,module,exports){
 module.exports = require("core-js-pure/stable/instance/for-each");
-},{"core-js-pure/stable/instance/for-each":93}],4:[function(require,module,exports){
+},{"core-js-pure/stable/instance/for-each":117}],4:[function(require,module,exports){
+module.exports = require("core-js-pure/stable/instance/starts-with");
+},{"core-js-pure/stable/instance/starts-with":118}],5:[function(require,module,exports){
 module.exports = require("core-js-pure/stable/object/assign");
-},{"core-js-pure/stable/object/assign":94}],5:[function(require,module,exports){
+},{"core-js-pure/stable/object/assign":119}],6:[function(require,module,exports){
 module.exports = require("core-js-pure/stable/object/define-property");
-},{"core-js-pure/stable/object/define-property":95}],6:[function(require,module,exports){
+},{"core-js-pure/stable/object/define-property":120}],7:[function(require,module,exports){
+module.exports = require("core-js-pure/stable/object/get-own-property-descriptor");
+},{"core-js-pure/stable/object/get-own-property-descriptor":121}],8:[function(require,module,exports){
+module.exports = require("core-js-pure/stable/weak-map");
+},{"core-js-pure/stable/weak-map":122}],9:[function(require,module,exports){
 require('../../modules/es.array.is-array');
 var path = require('../../internals/path');
 
 module.exports = path.Array.isArray;
 
-},{"../../internals/path":65,"../../modules/es.array.is-array":84}],7:[function(require,module,exports){
+},{"../../internals/path":84,"../../modules/es.array.is-array":104}],10:[function(require,module,exports){
 require('../../../modules/es.array.for-each');
 var entryVirtual = require('../../../internals/entry-virtual');
 
 module.exports = entryVirtual('Array').forEach;
 
-},{"../../../internals/entry-virtual":31,"../../../modules/es.array.for-each":83}],8:[function(require,module,exports){
+},{"../../../internals/entry-virtual":42,"../../../modules/es.array.for-each":103}],11:[function(require,module,exports){
 require('../../modules/es.date.now');
 var path = require('../../internals/path');
 
 module.exports = path.Date.now;
 
-},{"../../internals/path":65,"../../modules/es.date.now":86}],9:[function(require,module,exports){
+},{"../../internals/path":84,"../../modules/es.date.now":106}],12:[function(require,module,exports){
+var startsWith = require('../string/virtual/starts-with');
+
+var StringPrototype = String.prototype;
+
+module.exports = function (it) {
+  var own = it.startsWith;
+  return typeof it === 'string' || it === StringPrototype
+    || (it instanceof String && own === StringPrototype.startsWith) ? startsWith : own;
+};
+
+},{"../string/virtual/starts-with":16}],13:[function(require,module,exports){
 require('../../modules/es.object.assign');
 var path = require('../../internals/path');
 
 module.exports = path.Object.assign;
 
-},{"../../internals/path":65,"../../modules/es.object.assign":87}],10:[function(require,module,exports){
+},{"../../internals/path":84,"../../modules/es.object.assign":107}],14:[function(require,module,exports){
 require('../../modules/es.object.define-property');
 var path = require('../../internals/path');
 
@@ -44,14 +61,40 @@ var defineProperty = module.exports = function defineProperty(it, key, desc) {
 
 if (Object.defineProperty.sham) defineProperty.sham = true;
 
-},{"../../internals/path":65,"../../modules/es.object.define-property":88}],11:[function(require,module,exports){
+},{"../../internals/path":84,"../../modules/es.object.define-property":108}],15:[function(require,module,exports){
+require('../../modules/es.object.get-own-property-descriptor');
+var path = require('../../internals/path');
+
+var Object = path.Object;
+
+var getOwnPropertyDescriptor = module.exports = function getOwnPropertyDescriptor(it, key) {
+  return Object.getOwnPropertyDescriptor(it, key);
+};
+
+if (Object.getOwnPropertyDescriptor.sham) getOwnPropertyDescriptor.sham = true;
+
+},{"../../internals/path":84,"../../modules/es.object.get-own-property-descriptor":109}],16:[function(require,module,exports){
+require('../../../modules/es.string.starts-with');
+var entryVirtual = require('../../../internals/entry-virtual');
+
+module.exports = entryVirtual('String').startsWith;
+
+},{"../../../internals/entry-virtual":42,"../../../modules/es.string.starts-with":111}],17:[function(require,module,exports){
+require('../../modules/es.object.to-string');
+require('../../modules/es.weak-map');
+require('../../modules/web.dom-collections.iterator');
+var path = require('../../internals/path');
+
+module.exports = path.WeakMap;
+
+},{"../../internals/path":84,"../../modules/es.object.to-string":110,"../../modules/es.weak-map":112,"../../modules/web.dom-collections.iterator":113}],18:[function(require,module,exports){
 module.exports = function (it) {
   if (typeof it != 'function') {
     throw TypeError(String(it) + ' is not a function');
   } return it;
 };
 
-},{}],12:[function(require,module,exports){
+},{}],19:[function(require,module,exports){
 var isObject = require('../internals/is-object');
 
 module.exports = function (it) {
@@ -60,10 +103,17 @@ module.exports = function (it) {
   } return it;
 };
 
-},{"../internals/is-object":47}],13:[function(require,module,exports){
+},{"../internals/is-object":62}],20:[function(require,module,exports){
 module.exports = function () { /* empty */ };
 
-},{}],14:[function(require,module,exports){
+},{}],21:[function(require,module,exports){
+module.exports = function (it, Constructor, name) {
+  if (!(it instanceof Constructor)) {
+    throw TypeError('Incorrect ' + (name ? name + ' ' : '') + 'invocation');
+  } return it;
+};
+
+},{}],22:[function(require,module,exports){
 var isObject = require('../internals/is-object');
 
 module.exports = function (it) {
@@ -72,7 +122,7 @@ module.exports = function (it) {
   } return it;
 };
 
-},{"../internals/is-object":47}],15:[function(require,module,exports){
+},{"../internals/is-object":62}],23:[function(require,module,exports){
 'use strict';
 var $forEach = require('../internals/array-iteration').forEach;
 var arrayMethodIsStrict = require('../internals/array-method-is-strict');
@@ -87,7 +137,7 @@ module.exports = (!STRICT_METHOD || !USES_TO_LENGTH) ? function forEach(callback
   return $forEach(this, callbackfn, arguments.length > 1 ? arguments[1] : undefined);
 } : [].forEach;
 
-},{"../internals/array-iteration":17,"../internals/array-method-is-strict":18,"../internals/array-method-uses-to-length":19}],16:[function(require,module,exports){
+},{"../internals/array-iteration":25,"../internals/array-method-is-strict":26,"../internals/array-method-uses-to-length":27}],24:[function(require,module,exports){
 var toIndexedObject = require('../internals/to-indexed-object');
 var toLength = require('../internals/to-length');
 var toAbsoluteIndex = require('../internals/to-absolute-index');
@@ -121,7 +171,7 @@ module.exports = {
   indexOf: createMethod(false)
 };
 
-},{"../internals/to-absolute-index":73,"../internals/to-indexed-object":74,"../internals/to-length":76}],17:[function(require,module,exports){
+},{"../internals/to-absolute-index":93,"../internals/to-indexed-object":94,"../internals/to-length":96}],25:[function(require,module,exports){
 var bind = require('../internals/function-bind-context');
 var IndexedObject = require('../internals/indexed-object');
 var toObject = require('../internals/to-object');
@@ -195,7 +245,7 @@ module.exports = {
   filterOut: createMethod(7)
 };
 
-},{"../internals/array-species-create":20,"../internals/function-bind-context":35,"../internals/indexed-object":42,"../internals/to-length":76,"../internals/to-object":77}],18:[function(require,module,exports){
+},{"../internals/array-species-create":28,"../internals/function-bind-context":47,"../internals/indexed-object":55,"../internals/to-length":96,"../internals/to-object":97}],26:[function(require,module,exports){
 'use strict';
 var fails = require('../internals/fails');
 
@@ -207,7 +257,7 @@ module.exports = function (METHOD_NAME, argument) {
   });
 };
 
-},{"../internals/fails":34}],19:[function(require,module,exports){
+},{"../internals/fails":45}],27:[function(require,module,exports){
 var DESCRIPTORS = require('../internals/descriptors');
 var fails = require('../internals/fails');
 var has = require('../internals/has');
@@ -236,7 +286,7 @@ module.exports = function (METHOD_NAME, options) {
   });
 };
 
-},{"../internals/descriptors":28,"../internals/fails":34,"../internals/has":38}],20:[function(require,module,exports){
+},{"../internals/descriptors":39,"../internals/fails":45,"../internals/has":51}],28:[function(require,module,exports){
 var isObject = require('../internals/is-object');
 var isArray = require('../internals/is-array');
 var wellKnownSymbol = require('../internals/well-known-symbol');
@@ -258,14 +308,14 @@ module.exports = function (originalArray, length) {
   } return new (C === undefined ? Array : C)(length === 0 ? 0 : length);
 };
 
-},{"../internals/is-array":45,"../internals/is-object":47,"../internals/well-known-symbol":82}],21:[function(require,module,exports){
+},{"../internals/is-array":60,"../internals/is-object":62,"../internals/well-known-symbol":102}],29:[function(require,module,exports){
 var toString = {}.toString;
 
 module.exports = function (it) {
   return toString.call(it).slice(8, -1);
 };
 
-},{}],22:[function(require,module,exports){
+},{}],30:[function(require,module,exports){
 var TO_STRING_TAG_SUPPORT = require('../internals/to-string-tag-support');
 var classofRaw = require('../internals/classof-raw');
 var wellKnownSymbol = require('../internals/well-known-symbol');
@@ -293,7 +343,236 @@ module.exports = TO_STRING_TAG_SUPPORT ? classofRaw : function (it) {
     : (result = classofRaw(O)) == 'Object' && typeof O.callee == 'function' ? 'Arguments' : result;
 };
 
-},{"../internals/classof-raw":21,"../internals/to-string-tag-support":79,"../internals/well-known-symbol":82}],23:[function(require,module,exports){
+},{"../internals/classof-raw":29,"../internals/to-string-tag-support":99,"../internals/well-known-symbol":102}],31:[function(require,module,exports){
+'use strict';
+var redefineAll = require('../internals/redefine-all');
+var getWeakData = require('../internals/internal-metadata').getWeakData;
+var anObject = require('../internals/an-object');
+var isObject = require('../internals/is-object');
+var anInstance = require('../internals/an-instance');
+var iterate = require('../internals/iterate');
+var ArrayIterationModule = require('../internals/array-iteration');
+var $has = require('../internals/has');
+var InternalStateModule = require('../internals/internal-state');
+
+var setInternalState = InternalStateModule.set;
+var internalStateGetterFor = InternalStateModule.getterFor;
+var find = ArrayIterationModule.find;
+var findIndex = ArrayIterationModule.findIndex;
+var id = 0;
+
+// fallback for uncaught frozen keys
+var uncaughtFrozenStore = function (store) {
+  return store.frozen || (store.frozen = new UncaughtFrozenStore());
+};
+
+var UncaughtFrozenStore = function () {
+  this.entries = [];
+};
+
+var findUncaughtFrozen = function (store, key) {
+  return find(store.entries, function (it) {
+    return it[0] === key;
+  });
+};
+
+UncaughtFrozenStore.prototype = {
+  get: function (key) {
+    var entry = findUncaughtFrozen(this, key);
+    if (entry) return entry[1];
+  },
+  has: function (key) {
+    return !!findUncaughtFrozen(this, key);
+  },
+  set: function (key, value) {
+    var entry = findUncaughtFrozen(this, key);
+    if (entry) entry[1] = value;
+    else this.entries.push([key, value]);
+  },
+  'delete': function (key) {
+    var index = findIndex(this.entries, function (it) {
+      return it[0] === key;
+    });
+    if (~index) this.entries.splice(index, 1);
+    return !!~index;
+  }
+};
+
+module.exports = {
+  getConstructor: function (wrapper, CONSTRUCTOR_NAME, IS_MAP, ADDER) {
+    var C = wrapper(function (that, iterable) {
+      anInstance(that, C, CONSTRUCTOR_NAME);
+      setInternalState(that, {
+        type: CONSTRUCTOR_NAME,
+        id: id++,
+        frozen: undefined
+      });
+      if (iterable != undefined) iterate(iterable, that[ADDER], { that: that, AS_ENTRIES: IS_MAP });
+    });
+
+    var getInternalState = internalStateGetterFor(CONSTRUCTOR_NAME);
+
+    var define = function (that, key, value) {
+      var state = getInternalState(that);
+      var data = getWeakData(anObject(key), true);
+      if (data === true) uncaughtFrozenStore(state).set(key, value);
+      else data[state.id] = value;
+      return that;
+    };
+
+    redefineAll(C.prototype, {
+      // 23.3.3.2 WeakMap.prototype.delete(key)
+      // 23.4.3.3 WeakSet.prototype.delete(value)
+      'delete': function (key) {
+        var state = getInternalState(this);
+        if (!isObject(key)) return false;
+        var data = getWeakData(key);
+        if (data === true) return uncaughtFrozenStore(state)['delete'](key);
+        return data && $has(data, state.id) && delete data[state.id];
+      },
+      // 23.3.3.4 WeakMap.prototype.has(key)
+      // 23.4.3.4 WeakSet.prototype.has(value)
+      has: function has(key) {
+        var state = getInternalState(this);
+        if (!isObject(key)) return false;
+        var data = getWeakData(key);
+        if (data === true) return uncaughtFrozenStore(state).has(key);
+        return data && $has(data, state.id);
+      }
+    });
+
+    redefineAll(C.prototype, IS_MAP ? {
+      // 23.3.3.3 WeakMap.prototype.get(key)
+      get: function get(key) {
+        var state = getInternalState(this);
+        if (isObject(key)) {
+          var data = getWeakData(key);
+          if (data === true) return uncaughtFrozenStore(state).get(key);
+          return data ? data[state.id] : undefined;
+        }
+      },
+      // 23.3.3.5 WeakMap.prototype.set(key, value)
+      set: function set(key, value) {
+        return define(this, key, value);
+      }
+    } : {
+      // 23.4.3.1 WeakSet.prototype.add(value)
+      add: function add(value) {
+        return define(this, value, true);
+      }
+    });
+
+    return C;
+  }
+};
+
+},{"../internals/an-instance":21,"../internals/an-object":22,"../internals/array-iteration":25,"../internals/has":51,"../internals/internal-metadata":57,"../internals/internal-state":58,"../internals/is-object":62,"../internals/iterate":65,"../internals/redefine-all":85}],32:[function(require,module,exports){
+'use strict';
+
+var $ = require('./export');
+
+var global = require('../internals/global');
+
+var InternalMetadataModule = require('../internals/internal-metadata');
+
+var fails = require('../internals/fails');
+
+var createNonEnumerableProperty = require('../internals/create-non-enumerable-property');
+
+var iterate = require('../internals/iterate');
+
+var anInstance = require('../internals/an-instance');
+
+var isObject = require('../internals/is-object');
+
+var setToStringTag = require('../internals/set-to-string-tag');
+
+var defineProperty = require('../internals/object-define-property').f;
+
+var forEach = require('../internals/array-iteration').forEach;
+
+var DESCRIPTORS = require('../internals/descriptors');
+
+var InternalStateModule = require('../internals/internal-state');
+
+var setInternalState = InternalStateModule.set;
+var internalStateGetterFor = InternalStateModule.getterFor;
+
+module.exports = function (CONSTRUCTOR_NAME, wrapper, common) {
+  var IS_MAP = CONSTRUCTOR_NAME.indexOf('Map') !== -1;
+  var IS_WEAK = CONSTRUCTOR_NAME.indexOf('Weak') !== -1;
+  var ADDER = IS_MAP ? 'set' : 'add';
+  var NativeConstructor = global[CONSTRUCTOR_NAME];
+  var NativePrototype = NativeConstructor && NativeConstructor.prototype;
+  var exported = {};
+  var Constructor;
+
+  if (!DESCRIPTORS || typeof NativeConstructor != 'function' || !(IS_WEAK || NativePrototype.forEach && !fails(function () {
+    new NativeConstructor().entries().next();
+  }))) {
+    // create collection constructor
+    Constructor = common.getConstructor(wrapper, CONSTRUCTOR_NAME, IS_MAP, ADDER);
+    InternalMetadataModule.REQUIRED = true;
+  } else {
+    Constructor = wrapper(function (target, iterable) {
+      setInternalState(anInstance(target, Constructor, CONSTRUCTOR_NAME), {
+        type: CONSTRUCTOR_NAME,
+        collection: new NativeConstructor()
+      });
+      if (iterable != undefined) iterate(iterable, target[ADDER], {
+        that: target,
+        AS_ENTRIES: IS_MAP
+      });
+    });
+    var getInternalState = internalStateGetterFor(CONSTRUCTOR_NAME);
+    forEach(['add', 'clear', 'delete', 'forEach', 'get', 'has', 'set', 'keys', 'values', 'entries'], function (KEY) {
+      var IS_ADDER = KEY == 'add' || KEY == 'set';
+
+      if (KEY in NativePrototype && !(IS_WEAK && KEY == 'clear')) {
+        createNonEnumerableProperty(Constructor.prototype, KEY, function (a, b) {
+          var collection = getInternalState(this).collection;
+          if (!IS_ADDER && IS_WEAK && !isObject(a)) return KEY == 'get' ? undefined : false;
+          var result = collection[KEY](a === 0 ? 0 : a, b);
+          return IS_ADDER ? this : result;
+        });
+      }
+    });
+    IS_WEAK || defineProperty(Constructor.prototype, 'size', {
+      configurable: true,
+      get: function () {
+        return getInternalState(this).collection.size;
+      }
+    });
+  }
+
+  setToStringTag(Constructor, CONSTRUCTOR_NAME, false, true);
+  exported[CONSTRUCTOR_NAME] = Constructor;
+  $({
+    global: true,
+    forced: true
+  }, exported);
+  if (!IS_WEAK) common.setStrong(Constructor, CONSTRUCTOR_NAME, IS_MAP);
+  return Constructor;
+};
+
+},{"../internals/an-instance":21,"../internals/array-iteration":25,"../internals/create-non-enumerable-property":36,"../internals/descriptors":39,"../internals/fails":45,"../internals/global":50,"../internals/internal-metadata":57,"../internals/internal-state":58,"../internals/is-object":62,"../internals/iterate":65,"../internals/object-define-property":75,"../internals/set-to-string-tag":89,"./export":44}],33:[function(require,module,exports){
+var wellKnownSymbol = require('../internals/well-known-symbol');
+
+var MATCH = wellKnownSymbol('match');
+
+module.exports = function (METHOD_NAME) {
+  var regexp = /./;
+  try {
+    '/./'[METHOD_NAME](regexp);
+  } catch (error1) {
+    try {
+      regexp[MATCH] = false;
+      return '/./'[METHOD_NAME](regexp);
+    } catch (error2) { /* empty */ }
+  } return false;
+};
+
+},{"../internals/well-known-symbol":102}],34:[function(require,module,exports){
 var fails = require('../internals/fails');
 
 module.exports = !fails(function () {
@@ -302,7 +581,7 @@ module.exports = !fails(function () {
   return Object.getPrototypeOf(new F()) !== F.prototype;
 });
 
-},{"../internals/fails":34}],24:[function(require,module,exports){
+},{"../internals/fails":45}],35:[function(require,module,exports){
 'use strict';
 var IteratorPrototype = require('../internals/iterators-core').IteratorPrototype;
 var create = require('../internals/object-create');
@@ -320,7 +599,7 @@ module.exports = function (IteratorConstructor, NAME, next) {
   return IteratorConstructor;
 };
 
-},{"../internals/create-property-descriptor":26,"../internals/iterators":50,"../internals/iterators-core":49,"../internals/object-create":54,"../internals/set-to-string-tag":69}],25:[function(require,module,exports){
+},{"../internals/create-property-descriptor":37,"../internals/iterators":68,"../internals/iterators-core":67,"../internals/object-create":73,"../internals/set-to-string-tag":89}],36:[function(require,module,exports){
 var DESCRIPTORS = require('../internals/descriptors');
 var definePropertyModule = require('../internals/object-define-property');
 var createPropertyDescriptor = require('../internals/create-property-descriptor');
@@ -332,7 +611,7 @@ module.exports = DESCRIPTORS ? function (object, key, value) {
   return object;
 };
 
-},{"../internals/create-property-descriptor":26,"../internals/descriptors":28,"../internals/object-define-property":56}],26:[function(require,module,exports){
+},{"../internals/create-property-descriptor":37,"../internals/descriptors":39,"../internals/object-define-property":75}],37:[function(require,module,exports){
 module.exports = function (bitmap, value) {
   return {
     enumerable: !(bitmap & 1),
@@ -342,7 +621,7 @@ module.exports = function (bitmap, value) {
   };
 };
 
-},{}],27:[function(require,module,exports){
+},{}],38:[function(require,module,exports){
 'use strict';
 
 var $ = require('../internals/export');
@@ -469,7 +748,7 @@ module.exports = function (Iterable, NAME, IteratorConstructor, next, DEFAULT, I
   return methods;
 };
 
-},{"../internals/create-iterator-constructor":24,"../internals/create-non-enumerable-property":25,"../internals/export":33,"../internals/is-pure":48,"../internals/iterators":50,"../internals/iterators-core":49,"../internals/object-get-prototype-of":59,"../internals/object-set-prototype-of":63,"../internals/redefine":66,"../internals/set-to-string-tag":69,"../internals/well-known-symbol":82}],28:[function(require,module,exports){
+},{"../internals/create-iterator-constructor":35,"../internals/create-non-enumerable-property":36,"../internals/export":44,"../internals/is-pure":63,"../internals/iterators":68,"../internals/iterators-core":67,"../internals/object-get-prototype-of":78,"../internals/object-set-prototype-of":82,"../internals/redefine":86,"../internals/set-to-string-tag":89,"../internals/well-known-symbol":102}],39:[function(require,module,exports){
 var fails = require('../internals/fails');
 
 // Detect IE8's incomplete defineProperty implementation
@@ -477,7 +756,7 @@ module.exports = !fails(function () {
   return Object.defineProperty({}, 1, { get: function () { return 7; } })[1] != 7;
 });
 
-},{"../internals/fails":34}],29:[function(require,module,exports){
+},{"../internals/fails":45}],40:[function(require,module,exports){
 var global = require('../internals/global');
 var isObject = require('../internals/is-object');
 
@@ -489,7 +768,7 @@ module.exports = function (it) {
   return EXISTS ? document.createElement(it) : {};
 };
 
-},{"../internals/global":37,"../internals/is-object":47}],30:[function(require,module,exports){
+},{"../internals/global":50,"../internals/is-object":62}],41:[function(require,module,exports){
 // iterable DOM collections
 // flag - `iterable` interface - 'entries', 'keys', 'values', 'forEach' methods
 module.exports = {
@@ -526,14 +805,14 @@ module.exports = {
   TouchList: 0
 };
 
-},{}],31:[function(require,module,exports){
+},{}],42:[function(require,module,exports){
 var path = require('../internals/path');
 
 module.exports = function (CONSTRUCTOR) {
   return path[CONSTRUCTOR + 'Prototype'];
 };
 
-},{"../internals/path":65}],32:[function(require,module,exports){
+},{"../internals/path":84}],43:[function(require,module,exports){
 // IE8- don't enum bug keys
 module.exports = [
   'constructor',
@@ -545,7 +824,7 @@ module.exports = [
   'valueOf'
 ];
 
-},{}],33:[function(require,module,exports){
+},{}],44:[function(require,module,exports){
 'use strict';
 
 var global = require('../internals/global');
@@ -653,7 +932,7 @@ module.exports = function (options, source) {
   }
 };
 
-},{"../internals/create-non-enumerable-property":25,"../internals/function-bind-context":35,"../internals/global":37,"../internals/has":38,"../internals/is-forced":46,"../internals/object-get-own-property-descriptor":57,"../internals/path":65}],34:[function(require,module,exports){
+},{"../internals/create-non-enumerable-property":36,"../internals/function-bind-context":47,"../internals/global":50,"../internals/has":51,"../internals/is-forced":61,"../internals/object-get-own-property-descriptor":76,"../internals/path":84}],45:[function(require,module,exports){
 module.exports = function (exec) {
   try {
     return !!exec();
@@ -662,7 +941,14 @@ module.exports = function (exec) {
   }
 };
 
-},{}],35:[function(require,module,exports){
+},{}],46:[function(require,module,exports){
+var fails = require('../internals/fails');
+
+module.exports = !fails(function () {
+  return Object.isExtensible(Object.preventExtensions({}));
+});
+
+},{"../internals/fails":45}],47:[function(require,module,exports){
 var aFunction = require('../internals/a-function');
 
 // optional / simple context binding
@@ -688,7 +974,7 @@ module.exports = function (fn, that, length) {
   };
 };
 
-},{"../internals/a-function":11}],36:[function(require,module,exports){
+},{"../internals/a-function":18}],48:[function(require,module,exports){
 var path = require('../internals/path');
 var global = require('../internals/global');
 
@@ -701,7 +987,20 @@ module.exports = function (namespace, method) {
     : path[namespace] && path[namespace][method] || global[namespace] && global[namespace][method];
 };
 
-},{"../internals/global":37,"../internals/path":65}],37:[function(require,module,exports){
+},{"../internals/global":50,"../internals/path":84}],49:[function(require,module,exports){
+var classof = require('../internals/classof');
+var Iterators = require('../internals/iterators');
+var wellKnownSymbol = require('../internals/well-known-symbol');
+
+var ITERATOR = wellKnownSymbol('iterator');
+
+module.exports = function (it) {
+  if (it != undefined) return it[ITERATOR]
+    || it['@@iterator']
+    || Iterators[classof(it)];
+};
+
+},{"../internals/classof":30,"../internals/iterators":68,"../internals/well-known-symbol":102}],50:[function(require,module,exports){
 (function (global){(function (){
 var check = function (it) {
   return it && it.Math == Math && it;
@@ -719,22 +1018,22 @@ module.exports =
 
 }).call(this)}).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
 
-},{}],38:[function(require,module,exports){
+},{}],51:[function(require,module,exports){
 var hasOwnProperty = {}.hasOwnProperty;
 
 module.exports = function (it, key) {
   return hasOwnProperty.call(it, key);
 };
 
-},{}],39:[function(require,module,exports){
+},{}],52:[function(require,module,exports){
 module.exports = {};
 
-},{}],40:[function(require,module,exports){
+},{}],53:[function(require,module,exports){
 var getBuiltIn = require('../internals/get-built-in');
 
 module.exports = getBuiltIn('document', 'documentElement');
 
-},{"../internals/get-built-in":36}],41:[function(require,module,exports){
+},{"../internals/get-built-in":48}],54:[function(require,module,exports){
 var DESCRIPTORS = require('../internals/descriptors');
 var fails = require('../internals/fails');
 var createElement = require('../internals/document-create-element');
@@ -746,7 +1045,7 @@ module.exports = !DESCRIPTORS && !fails(function () {
   }).a != 7;
 });
 
-},{"../internals/descriptors":28,"../internals/document-create-element":29,"../internals/fails":34}],42:[function(require,module,exports){
+},{"../internals/descriptors":39,"../internals/document-create-element":40,"../internals/fails":45}],55:[function(require,module,exports){
 var fails = require('../internals/fails');
 var classof = require('../internals/classof-raw');
 
@@ -761,7 +1060,7 @@ module.exports = fails(function () {
   return classof(it) == 'String' ? split.call(it, '') : Object(it);
 } : Object;
 
-},{"../internals/classof-raw":21,"../internals/fails":34}],43:[function(require,module,exports){
+},{"../internals/classof-raw":29,"../internals/fails":45}],56:[function(require,module,exports){
 var store = require('../internals/shared-store');
 
 var functionToString = Function.toString;
@@ -775,7 +1074,70 @@ if (typeof store.inspectSource != 'function') {
 
 module.exports = store.inspectSource;
 
-},{"../internals/shared-store":71}],44:[function(require,module,exports){
+},{"../internals/shared-store":91}],57:[function(require,module,exports){
+var hiddenKeys = require('../internals/hidden-keys');
+var isObject = require('../internals/is-object');
+var has = require('../internals/has');
+var defineProperty = require('../internals/object-define-property').f;
+var uid = require('../internals/uid');
+var FREEZING = require('../internals/freezing');
+
+var METADATA = uid('meta');
+var id = 0;
+
+var isExtensible = Object.isExtensible || function () {
+  return true;
+};
+
+var setMetadata = function (it) {
+  defineProperty(it, METADATA, { value: {
+    objectID: 'O' + ++id, // object ID
+    weakData: {}          // weak collections IDs
+  } });
+};
+
+var fastKey = function (it, create) {
+  // return a primitive with prefix
+  if (!isObject(it)) return typeof it == 'symbol' ? it : (typeof it == 'string' ? 'S' : 'P') + it;
+  if (!has(it, METADATA)) {
+    // can't set metadata to uncaught frozen object
+    if (!isExtensible(it)) return 'F';
+    // not necessary to add metadata
+    if (!create) return 'E';
+    // add missing metadata
+    setMetadata(it);
+  // return object ID
+  } return it[METADATA].objectID;
+};
+
+var getWeakData = function (it, create) {
+  if (!has(it, METADATA)) {
+    // can't set metadata to uncaught frozen object
+    if (!isExtensible(it)) return true;
+    // not necessary to add metadata
+    if (!create) return false;
+    // add missing metadata
+    setMetadata(it);
+  // return the store of weak collections IDs
+  } return it[METADATA].weakData;
+};
+
+// add metadata on freeze-family methods calling
+var onFreeze = function (it) {
+  if (FREEZING && meta.REQUIRED && isExtensible(it) && !has(it, METADATA)) setMetadata(it);
+  return it;
+};
+
+var meta = module.exports = {
+  REQUIRED: false,
+  fastKey: fastKey,
+  getWeakData: getWeakData,
+  onFreeze: onFreeze
+};
+
+hiddenKeys[METADATA] = true;
+
+},{"../internals/freezing":46,"../internals/has":51,"../internals/hidden-keys":52,"../internals/is-object":62,"../internals/object-define-property":75,"../internals/uid":100}],58:[function(require,module,exports){
 var NATIVE_WEAK_MAP = require('../internals/native-weak-map');
 var global = require('../internals/global');
 var isObject = require('../internals/is-object');
@@ -841,7 +1203,19 @@ module.exports = {
   getterFor: getterFor
 };
 
-},{"../internals/create-non-enumerable-property":25,"../internals/global":37,"../internals/has":38,"../internals/hidden-keys":39,"../internals/is-object":47,"../internals/native-weak-map":52,"../internals/shared-key":70,"../internals/shared-store":71}],45:[function(require,module,exports){
+},{"../internals/create-non-enumerable-property":36,"../internals/global":50,"../internals/has":51,"../internals/hidden-keys":52,"../internals/is-object":62,"../internals/native-weak-map":70,"../internals/shared-key":90,"../internals/shared-store":91}],59:[function(require,module,exports){
+var wellKnownSymbol = require('../internals/well-known-symbol');
+var Iterators = require('../internals/iterators');
+
+var ITERATOR = wellKnownSymbol('iterator');
+var ArrayPrototype = Array.prototype;
+
+// check on default Array iterator
+module.exports = function (it) {
+  return it !== undefined && (Iterators.Array === it || ArrayPrototype[ITERATOR] === it);
+};
+
+},{"../internals/iterators":68,"../internals/well-known-symbol":102}],60:[function(require,module,exports){
 var classof = require('../internals/classof-raw');
 
 // `IsArray` abstract operation
@@ -850,7 +1224,7 @@ module.exports = Array.isArray || function isArray(arg) {
   return classof(arg) == 'Array';
 };
 
-},{"../internals/classof-raw":21}],46:[function(require,module,exports){
+},{"../internals/classof-raw":29}],61:[function(require,module,exports){
 var fails = require('../internals/fails');
 
 var replacement = /#|\.prototype\./;
@@ -873,15 +1247,99 @@ var POLYFILL = isForced.POLYFILL = 'P';
 
 module.exports = isForced;
 
-},{"../internals/fails":34}],47:[function(require,module,exports){
+},{"../internals/fails":45}],62:[function(require,module,exports){
 module.exports = function (it) {
   return typeof it === 'object' ? it !== null : typeof it === 'function';
 };
 
-},{}],48:[function(require,module,exports){
+},{}],63:[function(require,module,exports){
 module.exports = true;
 
-},{}],49:[function(require,module,exports){
+},{}],64:[function(require,module,exports){
+var isObject = require('../internals/is-object');
+var classof = require('../internals/classof-raw');
+var wellKnownSymbol = require('../internals/well-known-symbol');
+
+var MATCH = wellKnownSymbol('match');
+
+// `IsRegExp` abstract operation
+// https://tc39.es/ecma262/#sec-isregexp
+module.exports = function (it) {
+  var isRegExp;
+  return isObject(it) && ((isRegExp = it[MATCH]) !== undefined ? !!isRegExp : classof(it) == 'RegExp');
+};
+
+},{"../internals/classof-raw":29,"../internals/is-object":62,"../internals/well-known-symbol":102}],65:[function(require,module,exports){
+var anObject = require('../internals/an-object');
+var isArrayIteratorMethod = require('../internals/is-array-iterator-method');
+var toLength = require('../internals/to-length');
+var bind = require('../internals/function-bind-context');
+var getIteratorMethod = require('../internals/get-iterator-method');
+var iteratorClose = require('../internals/iterator-close');
+
+var Result = function (stopped, result) {
+  this.stopped = stopped;
+  this.result = result;
+};
+
+module.exports = function (iterable, unboundFunction, options) {
+  var that = options && options.that;
+  var AS_ENTRIES = !!(options && options.AS_ENTRIES);
+  var IS_ITERATOR = !!(options && options.IS_ITERATOR);
+  var INTERRUPTED = !!(options && options.INTERRUPTED);
+  var fn = bind(unboundFunction, that, 1 + AS_ENTRIES + INTERRUPTED);
+  var iterator, iterFn, index, length, result, next, step;
+
+  var stop = function (condition) {
+    if (iterator) iteratorClose(iterator);
+    return new Result(true, condition);
+  };
+
+  var callFn = function (value) {
+    if (AS_ENTRIES) {
+      anObject(value);
+      return INTERRUPTED ? fn(value[0], value[1], stop) : fn(value[0], value[1]);
+    } return INTERRUPTED ? fn(value, stop) : fn(value);
+  };
+
+  if (IS_ITERATOR) {
+    iterator = iterable;
+  } else {
+    iterFn = getIteratorMethod(iterable);
+    if (typeof iterFn != 'function') throw TypeError('Target is not iterable');
+    // optimisation for array iterators
+    if (isArrayIteratorMethod(iterFn)) {
+      for (index = 0, length = toLength(iterable.length); length > index; index++) {
+        result = callFn(iterable[index]);
+        if (result && result instanceof Result) return result;
+      } return new Result(false);
+    }
+    iterator = iterFn.call(iterable);
+  }
+
+  next = iterator.next;
+  while (!(step = next.call(iterator)).done) {
+    try {
+      result = callFn(step.value);
+    } catch (error) {
+      iteratorClose(iterator);
+      throw error;
+    }
+    if (typeof result == 'object' && result && result instanceof Result) return result;
+  } return new Result(false);
+};
+
+},{"../internals/an-object":22,"../internals/function-bind-context":47,"../internals/get-iterator-method":49,"../internals/is-array-iterator-method":59,"../internals/iterator-close":66,"../internals/to-length":96}],66:[function(require,module,exports){
+var anObject = require('../internals/an-object');
+
+module.exports = function (iterator) {
+  var returnMethod = iterator['return'];
+  if (returnMethod !== undefined) {
+    return anObject(returnMethod.call(iterator)).value;
+  }
+};
+
+},{"../internals/an-object":22}],67:[function(require,module,exports){
 'use strict';
 var getPrototypeOf = require('../internals/object-get-prototype-of');
 var createNonEnumerableProperty = require('../internals/create-non-enumerable-property');
@@ -920,9 +1378,9 @@ module.exports = {
   BUGGY_SAFARI_ITERATORS: BUGGY_SAFARI_ITERATORS
 };
 
-},{"../internals/create-non-enumerable-property":25,"../internals/has":38,"../internals/is-pure":48,"../internals/object-get-prototype-of":59,"../internals/well-known-symbol":82}],50:[function(require,module,exports){
-arguments[4][39][0].apply(exports,arguments)
-},{"dup":39}],51:[function(require,module,exports){
+},{"../internals/create-non-enumerable-property":36,"../internals/has":51,"../internals/is-pure":63,"../internals/object-get-prototype-of":78,"../internals/well-known-symbol":102}],68:[function(require,module,exports){
+arguments[4][52][0].apply(exports,arguments)
+},{"dup":52}],69:[function(require,module,exports){
 var fails = require('../internals/fails');
 
 module.exports = !!Object.getOwnPropertySymbols && !fails(function () {
@@ -931,7 +1389,7 @@ module.exports = !!Object.getOwnPropertySymbols && !fails(function () {
   return !String(Symbol());
 });
 
-},{"../internals/fails":34}],52:[function(require,module,exports){
+},{"../internals/fails":45}],70:[function(require,module,exports){
 var global = require('../internals/global');
 var inspectSource = require('../internals/inspect-source');
 
@@ -939,7 +1397,16 @@ var WeakMap = global.WeakMap;
 
 module.exports = typeof WeakMap === 'function' && /native code/.test(inspectSource(WeakMap));
 
-},{"../internals/global":37,"../internals/inspect-source":43}],53:[function(require,module,exports){
+},{"../internals/global":50,"../internals/inspect-source":56}],71:[function(require,module,exports){
+var isRegExp = require('../internals/is-regexp');
+
+module.exports = function (it) {
+  if (isRegExp(it)) {
+    throw TypeError("The method doesn't accept regular expressions");
+  } return it;
+};
+
+},{"../internals/is-regexp":64}],72:[function(require,module,exports){
 'use strict';
 var DESCRIPTORS = require('../internals/descriptors');
 var fails = require('../internals/fails');
@@ -993,7 +1460,7 @@ module.exports = !nativeAssign || fails(function () {
   } return T;
 } : nativeAssign;
 
-},{"../internals/descriptors":28,"../internals/fails":34,"../internals/indexed-object":42,"../internals/object-get-own-property-symbols":58,"../internals/object-keys":61,"../internals/object-property-is-enumerable":62,"../internals/to-object":77}],54:[function(require,module,exports){
+},{"../internals/descriptors":39,"../internals/fails":45,"../internals/indexed-object":55,"../internals/object-get-own-property-symbols":77,"../internals/object-keys":80,"../internals/object-property-is-enumerable":81,"../internals/to-object":97}],73:[function(require,module,exports){
 var anObject = require('../internals/an-object');
 var defineProperties = require('../internals/object-define-properties');
 var enumBugKeys = require('../internals/enum-bug-keys');
@@ -1073,7 +1540,7 @@ module.exports = Object.create || function create(O, Properties) {
   return Properties === undefined ? result : defineProperties(result, Properties);
 };
 
-},{"../internals/an-object":14,"../internals/document-create-element":29,"../internals/enum-bug-keys":32,"../internals/hidden-keys":39,"../internals/html":40,"../internals/object-define-properties":55,"../internals/shared-key":70}],55:[function(require,module,exports){
+},{"../internals/an-object":22,"../internals/document-create-element":40,"../internals/enum-bug-keys":43,"../internals/hidden-keys":52,"../internals/html":53,"../internals/object-define-properties":74,"../internals/shared-key":90}],74:[function(require,module,exports){
 var DESCRIPTORS = require('../internals/descriptors');
 var definePropertyModule = require('../internals/object-define-property');
 var anObject = require('../internals/an-object');
@@ -1091,7 +1558,7 @@ module.exports = DESCRIPTORS ? Object.defineProperties : function defineProperti
   return O;
 };
 
-},{"../internals/an-object":14,"../internals/descriptors":28,"../internals/object-define-property":56,"../internals/object-keys":61}],56:[function(require,module,exports){
+},{"../internals/an-object":22,"../internals/descriptors":39,"../internals/object-define-property":75,"../internals/object-keys":80}],75:[function(require,module,exports){
 var DESCRIPTORS = require('../internals/descriptors');
 var IE8_DOM_DEFINE = require('../internals/ie8-dom-define');
 var anObject = require('../internals/an-object');
@@ -1113,7 +1580,7 @@ exports.f = DESCRIPTORS ? nativeDefineProperty : function defineProperty(O, P, A
   return O;
 };
 
-},{"../internals/an-object":14,"../internals/descriptors":28,"../internals/ie8-dom-define":41,"../internals/to-primitive":78}],57:[function(require,module,exports){
+},{"../internals/an-object":22,"../internals/descriptors":39,"../internals/ie8-dom-define":54,"../internals/to-primitive":98}],76:[function(require,module,exports){
 var DESCRIPTORS = require('../internals/descriptors');
 var propertyIsEnumerableModule = require('../internals/object-property-is-enumerable');
 var createPropertyDescriptor = require('../internals/create-property-descriptor');
@@ -1135,10 +1602,10 @@ exports.f = DESCRIPTORS ? nativeGetOwnPropertyDescriptor : function getOwnProper
   if (has(O, P)) return createPropertyDescriptor(!propertyIsEnumerableModule.f.call(O, P), O[P]);
 };
 
-},{"../internals/create-property-descriptor":26,"../internals/descriptors":28,"../internals/has":38,"../internals/ie8-dom-define":41,"../internals/object-property-is-enumerable":62,"../internals/to-indexed-object":74,"../internals/to-primitive":78}],58:[function(require,module,exports){
+},{"../internals/create-property-descriptor":37,"../internals/descriptors":39,"../internals/has":51,"../internals/ie8-dom-define":54,"../internals/object-property-is-enumerable":81,"../internals/to-indexed-object":94,"../internals/to-primitive":98}],77:[function(require,module,exports){
 exports.f = Object.getOwnPropertySymbols;
 
-},{}],59:[function(require,module,exports){
+},{}],78:[function(require,module,exports){
 var has = require('../internals/has');
 var toObject = require('../internals/to-object');
 var sharedKey = require('../internals/shared-key');
@@ -1157,7 +1624,7 @@ module.exports = CORRECT_PROTOTYPE_GETTER ? Object.getPrototypeOf : function (O)
   } return O instanceof Object ? ObjectPrototype : null;
 };
 
-},{"../internals/correct-prototype-getter":23,"../internals/has":38,"../internals/shared-key":70,"../internals/to-object":77}],60:[function(require,module,exports){
+},{"../internals/correct-prototype-getter":34,"../internals/has":51,"../internals/shared-key":90,"../internals/to-object":97}],79:[function(require,module,exports){
 var has = require('../internals/has');
 var toIndexedObject = require('../internals/to-indexed-object');
 var indexOf = require('../internals/array-includes').indexOf;
@@ -1176,7 +1643,7 @@ module.exports = function (object, names) {
   return result;
 };
 
-},{"../internals/array-includes":16,"../internals/has":38,"../internals/hidden-keys":39,"../internals/to-indexed-object":74}],61:[function(require,module,exports){
+},{"../internals/array-includes":24,"../internals/has":51,"../internals/hidden-keys":52,"../internals/to-indexed-object":94}],80:[function(require,module,exports){
 var internalObjectKeys = require('../internals/object-keys-internal');
 var enumBugKeys = require('../internals/enum-bug-keys');
 
@@ -1186,7 +1653,7 @@ module.exports = Object.keys || function keys(O) {
   return internalObjectKeys(O, enumBugKeys);
 };
 
-},{"../internals/enum-bug-keys":32,"../internals/object-keys-internal":60}],62:[function(require,module,exports){
+},{"../internals/enum-bug-keys":43,"../internals/object-keys-internal":79}],81:[function(require,module,exports){
 'use strict';
 var nativePropertyIsEnumerable = {}.propertyIsEnumerable;
 var getOwnPropertyDescriptor = Object.getOwnPropertyDescriptor;
@@ -1201,7 +1668,7 @@ exports.f = NASHORN_BUG ? function propertyIsEnumerable(V) {
   return !!descriptor && descriptor.enumerable;
 } : nativePropertyIsEnumerable;
 
-},{}],63:[function(require,module,exports){
+},{}],82:[function(require,module,exports){
 var anObject = require('../internals/an-object');
 var aPossiblePrototype = require('../internals/a-possible-prototype');
 
@@ -1227,7 +1694,7 @@ module.exports = Object.setPrototypeOf || ('__proto__' in {} ? function () {
   };
 }() : undefined);
 
-},{"../internals/a-possible-prototype":12,"../internals/an-object":14}],64:[function(require,module,exports){
+},{"../internals/a-possible-prototype":19,"../internals/an-object":22}],83:[function(require,module,exports){
 'use strict';
 var TO_STRING_TAG_SUPPORT = require('../internals/to-string-tag-support');
 var classof = require('../internals/classof');
@@ -1238,9 +1705,19 @@ module.exports = TO_STRING_TAG_SUPPORT ? {}.toString : function toString() {
   return '[object ' + classof(this) + ']';
 };
 
-},{"../internals/classof":22,"../internals/to-string-tag-support":79}],65:[function(require,module,exports){
-arguments[4][39][0].apply(exports,arguments)
-},{"dup":39}],66:[function(require,module,exports){
+},{"../internals/classof":30,"../internals/to-string-tag-support":99}],84:[function(require,module,exports){
+arguments[4][52][0].apply(exports,arguments)
+},{"dup":52}],85:[function(require,module,exports){
+var redefine = require('../internals/redefine');
+
+module.exports = function (target, src, options) {
+  for (var key in src) {
+    if (options && options.unsafe && target[key]) target[key] = src[key];
+    else redefine(target, key, src[key], options);
+  } return target;
+};
+
+},{"../internals/redefine":86}],86:[function(require,module,exports){
 var createNonEnumerableProperty = require('../internals/create-non-enumerable-property');
 
 module.exports = function (target, key, value, options) {
@@ -1248,7 +1725,7 @@ module.exports = function (target, key, value, options) {
   else createNonEnumerableProperty(target, key, value);
 };
 
-},{"../internals/create-non-enumerable-property":25}],67:[function(require,module,exports){
+},{"../internals/create-non-enumerable-property":36}],87:[function(require,module,exports){
 // `RequireObjectCoercible` abstract operation
 // https://tc39.es/ecma262/#sec-requireobjectcoercible
 module.exports = function (it) {
@@ -1256,7 +1733,7 @@ module.exports = function (it) {
   return it;
 };
 
-},{}],68:[function(require,module,exports){
+},{}],88:[function(require,module,exports){
 var global = require('../internals/global');
 var createNonEnumerableProperty = require('../internals/create-non-enumerable-property');
 
@@ -1268,7 +1745,7 @@ module.exports = function (key, value) {
   } return value;
 };
 
-},{"../internals/create-non-enumerable-property":25,"../internals/global":37}],69:[function(require,module,exports){
+},{"../internals/create-non-enumerable-property":36,"../internals/global":50}],89:[function(require,module,exports){
 var TO_STRING_TAG_SUPPORT = require('../internals/to-string-tag-support');
 var defineProperty = require('../internals/object-define-property').f;
 var createNonEnumerableProperty = require('../internals/create-non-enumerable-property');
@@ -1290,7 +1767,7 @@ module.exports = function (it, TAG, STATIC, SET_METHOD) {
   }
 };
 
-},{"../internals/create-non-enumerable-property":25,"../internals/has":38,"../internals/object-define-property":56,"../internals/object-to-string":64,"../internals/to-string-tag-support":79,"../internals/well-known-symbol":82}],70:[function(require,module,exports){
+},{"../internals/create-non-enumerable-property":36,"../internals/has":51,"../internals/object-define-property":75,"../internals/object-to-string":83,"../internals/to-string-tag-support":99,"../internals/well-known-symbol":102}],90:[function(require,module,exports){
 var shared = require('../internals/shared');
 var uid = require('../internals/uid');
 
@@ -1300,7 +1777,7 @@ module.exports = function (key) {
   return keys[key] || (keys[key] = uid(key));
 };
 
-},{"../internals/shared":72,"../internals/uid":80}],71:[function(require,module,exports){
+},{"../internals/shared":92,"../internals/uid":100}],91:[function(require,module,exports){
 var global = require('../internals/global');
 var setGlobal = require('../internals/set-global');
 
@@ -1309,7 +1786,7 @@ var store = global[SHARED] || setGlobal(SHARED, {});
 
 module.exports = store;
 
-},{"../internals/global":37,"../internals/set-global":68}],72:[function(require,module,exports){
+},{"../internals/global":50,"../internals/set-global":88}],92:[function(require,module,exports){
 var IS_PURE = require('../internals/is-pure');
 var store = require('../internals/shared-store');
 
@@ -1321,7 +1798,7 @@ var store = require('../internals/shared-store');
   copyright: '© 2021 Denis Pushkarev (zloirock.ru)'
 });
 
-},{"../internals/is-pure":48,"../internals/shared-store":71}],73:[function(require,module,exports){
+},{"../internals/is-pure":63,"../internals/shared-store":91}],93:[function(require,module,exports){
 var toInteger = require('../internals/to-integer');
 
 var max = Math.max;
@@ -1335,7 +1812,7 @@ module.exports = function (index, length) {
   return integer < 0 ? max(integer + length, 0) : min(integer, length);
 };
 
-},{"../internals/to-integer":75}],74:[function(require,module,exports){
+},{"../internals/to-integer":95}],94:[function(require,module,exports){
 // toObject with fallback for non-array-like ES3 strings
 var IndexedObject = require('../internals/indexed-object');
 var requireObjectCoercible = require('../internals/require-object-coercible');
@@ -1344,7 +1821,7 @@ module.exports = function (it) {
   return IndexedObject(requireObjectCoercible(it));
 };
 
-},{"../internals/indexed-object":42,"../internals/require-object-coercible":67}],75:[function(require,module,exports){
+},{"../internals/indexed-object":55,"../internals/require-object-coercible":87}],95:[function(require,module,exports){
 var ceil = Math.ceil;
 var floor = Math.floor;
 
@@ -1354,7 +1831,7 @@ module.exports = function (argument) {
   return isNaN(argument = +argument) ? 0 : (argument > 0 ? floor : ceil)(argument);
 };
 
-},{}],76:[function(require,module,exports){
+},{}],96:[function(require,module,exports){
 var toInteger = require('../internals/to-integer');
 
 var min = Math.min;
@@ -1365,7 +1842,7 @@ module.exports = function (argument) {
   return argument > 0 ? min(toInteger(argument), 0x1FFFFFFFFFFFFF) : 0; // 2 ** 53 - 1 == 9007199254740991
 };
 
-},{"../internals/to-integer":75}],77:[function(require,module,exports){
+},{"../internals/to-integer":95}],97:[function(require,module,exports){
 var requireObjectCoercible = require('../internals/require-object-coercible');
 
 // `ToObject` abstract operation
@@ -1374,7 +1851,7 @@ module.exports = function (argument) {
   return Object(requireObjectCoercible(argument));
 };
 
-},{"../internals/require-object-coercible":67}],78:[function(require,module,exports){
+},{"../internals/require-object-coercible":87}],98:[function(require,module,exports){
 var isObject = require('../internals/is-object');
 
 // `ToPrimitive` abstract operation
@@ -1390,7 +1867,7 @@ module.exports = function (input, PREFERRED_STRING) {
   throw TypeError("Can't convert object to primitive value");
 };
 
-},{"../internals/is-object":47}],79:[function(require,module,exports){
+},{"../internals/is-object":62}],99:[function(require,module,exports){
 var wellKnownSymbol = require('../internals/well-known-symbol');
 
 var TO_STRING_TAG = wellKnownSymbol('toStringTag');
@@ -1400,7 +1877,7 @@ test[TO_STRING_TAG] = 'z';
 
 module.exports = String(test) === '[object z]';
 
-},{"../internals/well-known-symbol":82}],80:[function(require,module,exports){
+},{"../internals/well-known-symbol":102}],100:[function(require,module,exports){
 var id = 0;
 var postfix = Math.random();
 
@@ -1408,7 +1885,7 @@ module.exports = function (key) {
   return 'Symbol(' + String(key === undefined ? '' : key) + ')_' + (++id + postfix).toString(36);
 };
 
-},{}],81:[function(require,module,exports){
+},{}],101:[function(require,module,exports){
 var NATIVE_SYMBOL = require('../internals/native-symbol');
 
 module.exports = NATIVE_SYMBOL
@@ -1417,7 +1894,7 @@ module.exports = NATIVE_SYMBOL
   // eslint-disable-next-line no-undef
   && typeof Symbol.iterator == 'symbol';
 
-},{"../internals/native-symbol":51}],82:[function(require,module,exports){
+},{"../internals/native-symbol":69}],102:[function(require,module,exports){
 var global = require('../internals/global');
 var shared = require('../internals/shared');
 var has = require('../internals/has');
@@ -1436,7 +1913,7 @@ module.exports = function (name) {
   } return WellKnownSymbolsStore[name];
 };
 
-},{"../internals/global":37,"../internals/has":38,"../internals/native-symbol":51,"../internals/shared":72,"../internals/uid":80,"../internals/use-symbol-as-uid":81}],83:[function(require,module,exports){
+},{"../internals/global":50,"../internals/has":51,"../internals/native-symbol":69,"../internals/shared":92,"../internals/uid":100,"../internals/use-symbol-as-uid":101}],103:[function(require,module,exports){
 'use strict';
 
 var $ = require('../internals/export');
@@ -1453,7 +1930,7 @@ $({
   forEach: forEach
 });
 
-},{"../internals/array-for-each":15,"../internals/export":33}],84:[function(require,module,exports){
+},{"../internals/array-for-each":23,"../internals/export":44}],104:[function(require,module,exports){
 "use strict";
 
 var $ = require('../internals/export');
@@ -1469,7 +1946,7 @@ $({
   isArray: isArray
 });
 
-},{"../internals/export":33,"../internals/is-array":45}],85:[function(require,module,exports){
+},{"../internals/export":44,"../internals/is-array":60}],105:[function(require,module,exports){
 'use strict';
 var toIndexedObject = require('../internals/to-indexed-object');
 var addToUnscopables = require('../internals/add-to-unscopables');
@@ -1524,7 +2001,7 @@ addToUnscopables('keys');
 addToUnscopables('values');
 addToUnscopables('entries');
 
-},{"../internals/add-to-unscopables":13,"../internals/define-iterator":27,"../internals/internal-state":44,"../internals/iterators":50,"../internals/to-indexed-object":74}],86:[function(require,module,exports){
+},{"../internals/add-to-unscopables":20,"../internals/define-iterator":38,"../internals/internal-state":58,"../internals/iterators":68,"../internals/to-indexed-object":94}],106:[function(require,module,exports){
 "use strict";
 
 var $ = require('../internals/export'); // `Date.now` method
@@ -1540,7 +2017,7 @@ $({
   }
 });
 
-},{"../internals/export":33}],87:[function(require,module,exports){
+},{"../internals/export":44}],107:[function(require,module,exports){
 "use strict";
 
 var $ = require('../internals/export');
@@ -1557,7 +2034,7 @@ $({
   assign: assign
 });
 
-},{"../internals/export":33,"../internals/object-assign":53}],88:[function(require,module,exports){
+},{"../internals/export":44,"../internals/object-assign":72}],108:[function(require,module,exports){
 "use strict";
 
 var $ = require('../internals/export');
@@ -1577,7 +2054,152 @@ $({
   defineProperty: objectDefinePropertyModile.f
 });
 
-},{"../internals/descriptors":28,"../internals/export":33,"../internals/object-define-property":56}],89:[function(require,module,exports){
+},{"../internals/descriptors":39,"../internals/export":44,"../internals/object-define-property":75}],109:[function(require,module,exports){
+"use strict";
+
+var $ = require('../internals/export');
+
+var fails = require('../internals/fails');
+
+var toIndexedObject = require('../internals/to-indexed-object');
+
+var nativeGetOwnPropertyDescriptor = require('../internals/object-get-own-property-descriptor').f;
+
+var DESCRIPTORS = require('../internals/descriptors');
+
+var FAILS_ON_PRIMITIVES = fails(function () {
+  nativeGetOwnPropertyDescriptor(1);
+});
+var FORCED = !DESCRIPTORS || FAILS_ON_PRIMITIVES; // `Object.getOwnPropertyDescriptor` method
+// https://tc39.es/ecma262/#sec-object.getownpropertydescriptor
+
+$({
+  target: 'Object',
+  stat: true,
+  forced: FORCED,
+  sham: !DESCRIPTORS
+}, {
+  getOwnPropertyDescriptor: function getOwnPropertyDescriptor(it, key) {
+    return nativeGetOwnPropertyDescriptor(toIndexedObject(it), key);
+  }
+});
+
+},{"../internals/descriptors":39,"../internals/export":44,"../internals/fails":45,"../internals/object-get-own-property-descriptor":76,"../internals/to-indexed-object":94}],110:[function(require,module,exports){
+// empty
+
+},{}],111:[function(require,module,exports){
+'use strict';
+
+var $ = require('../internals/export');
+
+var getOwnPropertyDescriptor = require('../internals/object-get-own-property-descriptor').f;
+
+var toLength = require('../internals/to-length');
+
+var notARegExp = require('../internals/not-a-regexp');
+
+var requireObjectCoercible = require('../internals/require-object-coercible');
+
+var correctIsRegExpLogic = require('../internals/correct-is-regexp-logic');
+
+var IS_PURE = require('../internals/is-pure');
+
+var nativeStartsWith = ''.startsWith;
+var min = Math.min;
+var CORRECT_IS_REGEXP_LOGIC = correctIsRegExpLogic('startsWith'); // https://github.com/zloirock/core-js/pull/702
+
+var MDN_POLYFILL_BUG = !IS_PURE && !CORRECT_IS_REGEXP_LOGIC && !!function () {
+  var descriptor = getOwnPropertyDescriptor(String.prototype, 'startsWith');
+  return descriptor && !descriptor.writable;
+}(); // `String.prototype.startsWith` method
+// https://tc39.es/ecma262/#sec-string.prototype.startswith
+
+$({
+  target: 'String',
+  proto: true,
+  forced: !MDN_POLYFILL_BUG && !CORRECT_IS_REGEXP_LOGIC
+}, {
+  startsWith: function startsWith(searchString
+  /* , position = 0 */
+  ) {
+    var that = String(requireObjectCoercible(this));
+    notARegExp(searchString);
+    var index = toLength(min(arguments.length > 1 ? arguments[1] : undefined, that.length));
+    var search = String(searchString);
+    return nativeStartsWith ? nativeStartsWith.call(that, search, index) : that.slice(index, index + search.length) === search;
+  }
+});
+
+},{"../internals/correct-is-regexp-logic":33,"../internals/export":44,"../internals/is-pure":63,"../internals/not-a-regexp":71,"../internals/object-get-own-property-descriptor":76,"../internals/require-object-coercible":87,"../internals/to-length":96}],112:[function(require,module,exports){
+'use strict';
+var global = require('../internals/global');
+var redefineAll = require('../internals/redefine-all');
+var InternalMetadataModule = require('../internals/internal-metadata');
+var collection = require('../internals/collection');
+var collectionWeak = require('../internals/collection-weak');
+var isObject = require('../internals/is-object');
+var enforceIternalState = require('../internals/internal-state').enforce;
+var NATIVE_WEAK_MAP = require('../internals/native-weak-map');
+
+var IS_IE11 = !global.ActiveXObject && 'ActiveXObject' in global;
+var isExtensible = Object.isExtensible;
+var InternalWeakMap;
+
+var wrapper = function (init) {
+  return function WeakMap() {
+    return init(this, arguments.length ? arguments[0] : undefined);
+  };
+};
+
+// `WeakMap` constructor
+// https://tc39.es/ecma262/#sec-weakmap-constructor
+var $WeakMap = module.exports = collection('WeakMap', wrapper, collectionWeak);
+
+// IE11 WeakMap frozen keys fix
+// We can't use feature detection because it crash some old IE builds
+// https://github.com/zloirock/core-js/issues/485
+if (NATIVE_WEAK_MAP && IS_IE11) {
+  InternalWeakMap = collectionWeak.getConstructor(wrapper, 'WeakMap', true);
+  InternalMetadataModule.REQUIRED = true;
+  var WeakMapPrototype = $WeakMap.prototype;
+  var nativeDelete = WeakMapPrototype['delete'];
+  var nativeHas = WeakMapPrototype.has;
+  var nativeGet = WeakMapPrototype.get;
+  var nativeSet = WeakMapPrototype.set;
+  redefineAll(WeakMapPrototype, {
+    'delete': function (key) {
+      if (isObject(key) && !isExtensible(key)) {
+        var state = enforceIternalState(this);
+        if (!state.frozen) state.frozen = new InternalWeakMap();
+        return nativeDelete.call(this, key) || state.frozen['delete'](key);
+      } return nativeDelete.call(this, key);
+    },
+    has: function has(key) {
+      if (isObject(key) && !isExtensible(key)) {
+        var state = enforceIternalState(this);
+        if (!state.frozen) state.frozen = new InternalWeakMap();
+        return nativeHas.call(this, key) || state.frozen.has(key);
+      } return nativeHas.call(this, key);
+    },
+    get: function get(key) {
+      if (isObject(key) && !isExtensible(key)) {
+        var state = enforceIternalState(this);
+        if (!state.frozen) state.frozen = new InternalWeakMap();
+        return nativeHas.call(this, key) ? nativeGet.call(this, key) : state.frozen.get(key);
+      } return nativeGet.call(this, key);
+    },
+    set: function set(key, value) {
+      if (isObject(key) && !isExtensible(key)) {
+        var state = enforceIternalState(this);
+        if (!state.frozen) state.frozen = new InternalWeakMap();
+        nativeHas.call(this, key) ? nativeSet.call(this, key, value) : state.frozen.set(key, value);
+      } else nativeSet.call(this, key, value);
+      return this;
+    }
+  });
+}
+
+},{"../internals/collection":32,"../internals/collection-weak":31,"../internals/global":50,"../internals/internal-metadata":57,"../internals/internal-state":58,"../internals/is-object":62,"../internals/native-weak-map":70,"../internals/redefine-all":85}],113:[function(require,module,exports){
 require('./es.array.iterator');
 var DOMIterables = require('../internals/dom-iterables');
 var global = require('../internals/global');
@@ -1597,22 +2219,22 @@ for (var COLLECTION_NAME in DOMIterables) {
   Iterators[COLLECTION_NAME] = Iterators.Array;
 }
 
-},{"../internals/classof":22,"../internals/create-non-enumerable-property":25,"../internals/dom-iterables":30,"../internals/global":37,"../internals/iterators":50,"../internals/well-known-symbol":82,"./es.array.iterator":85}],90:[function(require,module,exports){
+},{"../internals/classof":30,"../internals/create-non-enumerable-property":36,"../internals/dom-iterables":41,"../internals/global":50,"../internals/iterators":68,"../internals/well-known-symbol":102,"./es.array.iterator":105}],114:[function(require,module,exports){
 var parent = require('../../es/array/is-array');
 
 module.exports = parent;
 
-},{"../../es/array/is-array":6}],91:[function(require,module,exports){
+},{"../../es/array/is-array":9}],115:[function(require,module,exports){
 var parent = require('../../../es/array/virtual/for-each');
 
 module.exports = parent;
 
-},{"../../../es/array/virtual/for-each":7}],92:[function(require,module,exports){
+},{"../../../es/array/virtual/for-each":10}],116:[function(require,module,exports){
 var parent = require('../../es/date/now');
 
 module.exports = parent;
 
-},{"../../es/date/now":8}],93:[function(require,module,exports){
+},{"../../es/date/now":11}],117:[function(require,module,exports){
 require('../../modules/web.dom-collections.iterator');
 var forEach = require('../array/virtual/for-each');
 var classof = require('../../internals/classof');
@@ -1630,17 +2252,32 @@ module.exports = function (it) {
     || DOMIterables.hasOwnProperty(classof(it)) ? forEach : own;
 };
 
-},{"../../internals/classof":22,"../../modules/web.dom-collections.iterator":89,"../array/virtual/for-each":91}],94:[function(require,module,exports){
+},{"../../internals/classof":30,"../../modules/web.dom-collections.iterator":113,"../array/virtual/for-each":115}],118:[function(require,module,exports){
+var parent = require('../../es/instance/starts-with');
+
+module.exports = parent;
+
+},{"../../es/instance/starts-with":12}],119:[function(require,module,exports){
 var parent = require('../../es/object/assign');
 
 module.exports = parent;
 
-},{"../../es/object/assign":9}],95:[function(require,module,exports){
+},{"../../es/object/assign":13}],120:[function(require,module,exports){
 var parent = require('../../es/object/define-property');
 
 module.exports = parent;
 
-},{"../../es/object/define-property":10}],96:[function(require,module,exports){
+},{"../../es/object/define-property":14}],121:[function(require,module,exports){
+var parent = require('../../es/object/get-own-property-descriptor');
+
+module.exports = parent;
+
+},{"../../es/object/get-own-property-descriptor":15}],122:[function(require,module,exports){
+var parent = require('../../es/weak-map');
+
+module.exports = parent;
+
+},{"../../es/weak-map":17}],123:[function(require,module,exports){
 // Copyright Joyent, Inc. and other Node contributors.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
@@ -2118,7 +2755,7 @@ function once(emitter, name) {
   });
 }
 
-},{}],97:[function(require,module,exports){
+},{}],124:[function(require,module,exports){
 (function (global){(function (){
 /*! https://mths.be/punycode v1.4.1 by @mathias */
 ;(function(root) {
@@ -2656,7 +3293,7 @@ function once(emitter, name) {
 
 }).call(this)}).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
 
-},{}],98:[function(require,module,exports){
+},{}],125:[function(require,module,exports){
 // Copyright Joyent, Inc. and other Node contributors.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
@@ -2742,7 +3379,7 @@ var isArray = Array.isArray || function (xs) {
   return Object.prototype.toString.call(xs) === '[object Array]';
 };
 
-},{}],99:[function(require,module,exports){
+},{}],126:[function(require,module,exports){
 // Copyright Joyent, Inc. and other Node contributors.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
@@ -2829,13 +3466,13 @@ var objectKeys = Object.keys || function (obj) {
   return res;
 };
 
-},{}],100:[function(require,module,exports){
+},{}],127:[function(require,module,exports){
 'use strict';
 
 exports.decode = exports.parse = require('./decode');
 exports.encode = exports.stringify = require('./encode');
 
-},{"./decode":98,"./encode":99}],101:[function(require,module,exports){
+},{"./decode":125,"./encode":126}],128:[function(require,module,exports){
 "use strict";Object.defineProperty(exports,"__esModule",{value:true});exports.AmbientLight=AmbientLight;exports.AmbientLightProbe=AmbientLightProbe;exports.AnimationClip=AnimationClip;exports.AnimationLoader=AnimationLoader;exports.AnimationMixer=AnimationMixer;exports.AnimationObjectGroup=AnimationObjectGroup;exports.ArcCurve=ArcCurve;exports.ArrayCamera=ArrayCamera;exports.AudioLoader=AudioLoader;exports.AxisHelper=AxisHelper;exports.BinaryTextureLoader=BinaryTextureLoader;exports.Bone=Bone;exports.BooleanKeyframeTrack=BooleanKeyframeTrack;exports.BoundingBoxHelper=BoundingBoxHelper;exports.BufferAttribute=BufferAttribute;exports.BufferGeometry=BufferGeometry;exports.BufferGeometryLoader=BufferGeometryLoader;exports.Camera=Camera;exports.CanvasRenderer=CanvasRenderer;exports.CanvasTexture=CanvasTexture;exports.CatmullRomCurve3=CatmullRomCurve3;exports.ClosedSplineCurve3=ClosedSplineCurve3;exports.ColorKeyframeTrack=ColorKeyframeTrack;exports.CompressedTexture=CompressedTexture;exports.CompressedTextureLoader=CompressedTextureLoader;exports.CubeCamera=CubeCamera;exports.CubeTexture=CubeTexture;exports.CubeTextureLoader=CubeTextureLoader;exports.CubicBezierCurve=CubicBezierCurve;exports.CubicBezierCurve3=CubicBezierCurve3;exports.CubicInterpolant=CubicInterpolant;exports.Curve=Curve;exports.CurvePath=CurvePath;exports.DataTexture=DataTexture;exports.DataTexture2DArray=DataTexture2DArray;exports.DataTexture3D=DataTexture3D;exports.DataTextureLoader=DataTextureLoader;exports.DepthTexture=DepthTexture;exports.DirectionalLight=DirectionalLight;exports.DiscreteInterpolant=DiscreteInterpolant;exports.DynamicBufferAttribute=DynamicBufferAttribute;exports.EdgesHelper=EdgesHelper;exports.EllipseCurve=EllipseCurve;exports.EventDispatcher=EventDispatcher;exports.Face4=Face4;exports.FileLoader=FileLoader;exports.Float16BufferAttribute=Float16BufferAttribute;exports.Float32Attribute=Float32Attribute;exports.Float32BufferAttribute=Float32BufferAttribute;exports.Float64Attribute=Float64Attribute;exports.Float64BufferAttribute=Float64BufferAttribute;exports.Font=Font;exports.FontLoader=FontLoader;exports.GLBufferAttribute=GLBufferAttribute;exports.Geometry=Geometry;exports.Group=Group;exports.HemisphereLight=HemisphereLight;exports.HemisphereLightProbe=HemisphereLightProbe;exports.ImageBitmapLoader=ImageBitmapLoader;exports.ImageLoader=ImageLoader;exports.ImmediateRenderObject=ImmediateRenderObject;exports.InstancedBufferAttribute=InstancedBufferAttribute;exports.InstancedBufferGeometry=InstancedBufferGeometry;exports.InstancedInterleavedBuffer=InstancedInterleavedBuffer;exports.InstancedMesh=InstancedMesh;exports.Int16Attribute=Int16Attribute;exports.Int16BufferAttribute=Int16BufferAttribute;exports.Int32Attribute=Int32Attribute;exports.Int32BufferAttribute=Int32BufferAttribute;exports.Int8Attribute=Int8Attribute;exports.Int8BufferAttribute=Int8BufferAttribute;exports.InterleavedBuffer=InterleavedBuffer;exports.InterleavedBufferAttribute=InterleavedBufferAttribute;exports.Interpolant=Interpolant;exports.JSONLoader=JSONLoader;exports.KeyframeTrack=KeyframeTrack;exports.LOD=LOD;exports.LensFlare=LensFlare;exports.Light=Light;exports.LightProbe=LightProbe;exports.Line=Line;exports.LineBasicMaterial=LineBasicMaterial;exports.LineCurve=LineCurve;exports.LineCurve3=LineCurve3;exports.LineDashedMaterial=LineDashedMaterial;exports.LineLoop=LineLoop;exports.LineSegments=LineSegments;exports.LinearInterpolant=LinearInterpolant;exports.Loader=Loader;exports.LoadingManager=LoadingManager;exports.Material=Material;exports.MaterialLoader=MaterialLoader;exports.Mesh=Mesh;exports.MeshBasicMaterial=MeshBasicMaterial;exports.MeshDepthMaterial=MeshDepthMaterial;exports.MeshDistanceMaterial=MeshDistanceMaterial;exports.MeshFaceMaterial=MeshFaceMaterial;exports.MeshLambertMaterial=MeshLambertMaterial;exports.MeshMatcapMaterial=MeshMatcapMaterial;exports.MeshNormalMaterial=MeshNormalMaterial;exports.MeshPhongMaterial=MeshPhongMaterial;exports.MeshPhysicalMaterial=MeshPhysicalMaterial;exports.MeshStandardMaterial=MeshStandardMaterial;exports.MeshToonMaterial=MeshToonMaterial;exports.MultiMaterial=MultiMaterial;exports.NumberKeyframeTrack=NumberKeyframeTrack;exports.Object3D=Object3D;exports.OrthographicCamera=OrthographicCamera;exports.ParametricBufferGeometry=ParametricBufferGeometry;exports.ParametricGeometry=ParametricGeometry;exports.Particle=Particle;exports.ParticleBasicMaterial=ParticleBasicMaterial;exports.ParticleSystem=ParticleSystem;exports.ParticleSystemMaterial=ParticleSystemMaterial;exports.Path=Path;exports.PerspectiveCamera=PerspectiveCamera;exports.PointCloud=PointCloud;exports.PointCloudMaterial=PointCloudMaterial;exports.PointLight=PointLight;exports.Points=Points;exports.PointsMaterial=PointsMaterial;exports.PropertyBinding=PropertyBinding;exports.PropertyMixer=PropertyMixer;exports.QuadraticBezierCurve=QuadraticBezierCurve;exports.QuadraticBezierCurve3=QuadraticBezierCurve3;exports.QuaternionKeyframeTrack=QuaternionKeyframeTrack;exports.QuaternionLinearInterpolant=QuaternionLinearInterpolant;exports.RawShaderMaterial=RawShaderMaterial;exports.Raycaster=Raycaster;exports.RectAreaLight=RectAreaLight;exports.ShaderMaterial=ShaderMaterial;exports.ShadowMaterial=ShadowMaterial;exports.Shape=Shape;exports.ShapePath=ShapePath;exports.Skeleton=Skeleton;exports.SkinnedMesh=SkinnedMesh;exports.Spline=Spline;exports.SplineCurve=SplineCurve;exports.SplineCurve3=SplineCurve3;exports.SpotLight=SpotLight;exports.Sprite=Sprite;exports.SpriteMaterial=SpriteMaterial;exports.StereoCamera=StereoCamera;exports.StringKeyframeTrack=StringKeyframeTrack;exports.Texture=Texture;exports.TextureLoader=TextureLoader;exports.Uint16Attribute=Uint16Attribute;exports.Uint16BufferAttribute=Uint16BufferAttribute;exports.Uint32Attribute=Uint32Attribute;exports.Uint32BufferAttribute=Uint32BufferAttribute;exports.Uint8Attribute=Uint8Attribute;exports.Uint8BufferAttribute=Uint8BufferAttribute;exports.Uint8ClampedAttribute=Uint8ClampedAttribute;exports.Uint8ClampedBufferAttribute=Uint8ClampedBufferAttribute;exports.VectorKeyframeTrack=VectorKeyframeTrack;exports.Vertex=Vertex;exports.VideoTexture=VideoTexture;exports.WebGL1Renderer=WebGL1Renderer;exports.WebGLCubeRenderTarget=WebGLCubeRenderTarget;exports.WebGLMultisampleRenderTarget=WebGLMultisampleRenderTarget;exports.WebGLRenderTarget=WebGLRenderTarget;exports.WebGLRenderTargetCube=WebGLRenderTargetCube;exports.WebGLRenderer=WebGLRenderer;exports.WebGLUtils=WebGLUtils;exports.WireframeHelper=WireframeHelper;exports.XHRLoader=XHRLoader;exports.InterpolateSmooth=exports.InterpolateLinear=exports.InterpolateDiscrete=exports.IntType=exports.IncrementWrapStencilOp=exports.IncrementStencilOp=exports.ImageUtils=exports.IcosahedronGeometry=exports.IcosahedronBufferGeometry=exports.HemisphereLightHelper=exports.HalfFloatType=exports.GridHelper=exports.GreaterStencilFunc=exports.GreaterEqualStencilFunc=exports.GreaterEqualDepth=exports.GreaterDepth=exports.GeometryUtils=exports.GammaEncoding=exports.GLSL3=exports.GLSL1=exports.Frustum=exports.FrontSide=exports.FogExp2=exports.Fog=exports.FloatType=exports.FlatShading=exports.FaceColors=exports.Face3=exports.ExtrudeGeometry=exports.ExtrudeBufferGeometry=exports.Euler=exports.EquirectangularRefractionMapping=exports.EquirectangularReflectionMapping=exports.EqualStencilFunc=exports.EqualDepth=exports.EdgesGeometry=exports.DynamicReadUsage=exports.DynamicDrawUsage=exports.DynamicCopyUsage=exports.DstColorFactor=exports.DstAlphaFactor=exports.DoubleSide=exports.DodecahedronGeometry=exports.DodecahedronBufferGeometry=exports.DirectionalLightHelper=exports.DepthStencilFormat=exports.DepthFormat=exports.DefaultLoadingManager=exports.DecrementWrapStencilOp=exports.DecrementStencilOp=exports.DataUtils=exports.Cylindrical=exports.CylinderGeometry=exports.CylinderBufferGeometry=exports.CustomToneMapping=exports.CustomBlending=exports.CullFaceNone=exports.CullFaceFrontBack=exports.CullFaceFront=exports.CullFaceBack=exports.CubeUVRefractionMapping=exports.CubeUVReflectionMapping=exports.CubeRefractionMapping=exports.CubeReflectionMapping=exports.ConeGeometry=exports.ConeBufferGeometry=exports.Color=exports.Clock=exports.ClampToEdgeWrapping=exports.CircleGeometry=exports.CircleBufferGeometry=exports.CineonToneMapping=exports.CameraHelper=exports.Cache=exports.ByteType=exports.BoxHelper=exports.CubeGeometry=exports.BoxGeometry=exports.BoxBufferGeometry=exports.Box3Helper=exports.Box3=exports.Box2=exports.BasicShadowMap=exports.BasicDepthPacking=exports.BackSide=exports.AxesHelper=exports.AudioListener=exports.AudioContext=exports.AudioAnalyser=exports.Audio=exports.ArrowHelper=exports.AnimationUtils=exports.AlwaysStencilFunc=exports.AlwaysDepth=exports.AlphaFormat=exports.AdditiveBlending=exports.AdditiveAnimationBlendMode=exports.AddOperation=exports.AddEquation=exports.ACESFilmicToneMapping=void 0;exports.RGBEEncoding=exports.RGBDEncoding=exports.RGBA_S3TC_DXT5_Format=exports.RGBA_S3TC_DXT3_Format=exports.RGBA_S3TC_DXT1_Format=exports.RGBA_PVRTC_4BPPV1_Format=exports.RGBA_PVRTC_2BPPV1_Format=exports.RGBA_ETC2_EAC_Format=exports.RGBA_BPTC_Format=exports.RGBA_ASTC_8x8_Format=exports.RGBA_ASTC_8x6_Format=exports.RGBA_ASTC_8x5_Format=exports.RGBA_ASTC_6x6_Format=exports.RGBA_ASTC_6x5_Format=exports.RGBA_ASTC_5x5_Format=exports.RGBA_ASTC_5x4_Format=exports.RGBA_ASTC_4x4_Format=exports.RGBA_ASTC_12x12_Format=exports.RGBA_ASTC_12x10_Format=exports.RGBA_ASTC_10x8_Format=exports.RGBA_ASTC_10x6_Format=exports.RGBA_ASTC_10x5_Format=exports.RGBA_ASTC_10x10_Format=exports.RGBAIntegerFormat=exports.RGBAFormat=exports.RGBADepthPacking=exports.REVISION=exports.Quaternion=exports.PositionalAudio=exports.PolyhedronGeometry=exports.PolyhedronBufferGeometry=exports.PolarGridHelper=exports.PointLightHelper=exports.PlaneHelper=exports.PlaneGeometry=exports.PlaneBufferGeometry=exports.Plane=exports.PMREMGenerator=exports.PCFSoftShadowMap=exports.PCFShadowMap=exports.OneMinusSrcColorFactor=exports.OneMinusSrcAlphaFactor=exports.OneMinusDstColorFactor=exports.OneMinusDstAlphaFactor=exports.OneFactor=exports.OctahedronGeometry=exports.OctahedronBufferGeometry=exports.ObjectSpaceNormalMap=exports.ObjectLoader=exports.NotEqualStencilFunc=exports.NotEqualDepth=exports.NormalBlending=exports.NormalAnimationBlendMode=exports.NoToneMapping=exports.NoColors=exports.NoBlending=exports.NeverStencilFunc=exports.NeverDepth=exports.NearestMipmapNearestFilter=exports.NearestMipmapLinearFilter=exports.NearestMipMapNearestFilter=exports.NearestMipMapLinearFilter=exports.NearestFilter=exports.MultiplyOperation=exports.MultiplyBlending=exports.MixOperation=exports.MirroredRepeatWrapping=exports.MinEquation=exports.MaxEquation=exports.Matrix4=exports.Matrix3=exports.MathUtils=exports.Math=exports.MOUSE=exports.LuminanceFormat=exports.LuminanceAlphaFormat=exports.LoopRepeat=exports.LoopPingPong=exports.LoopOnce=exports.LogLuvEncoding=exports.LoaderUtils=exports.LinearToneMapping=exports.LinearMipmapNearestFilter=exports.LinearMipmapLinearFilter=exports.LinearMipMapNearestFilter=exports.LinearMipMapLinearFilter=exports.LinearFilter=exports.LinearEncoding=exports.LineStrip=exports.LinePieces=exports.Line3=exports.LessStencilFunc=exports.LessEqualStencilFunc=exports.LessEqualDepth=exports.LessDepth=exports.Layers=exports.LatheGeometry=exports.LatheBufferGeometry=exports.KeepStencilOp=exports.InvertStencilOp=void 0;exports.ZeroStencilOp=exports.ZeroSlopeEnding=exports.ZeroFactor=exports.ZeroCurvatureEnding=exports.WrapAroundEnding=exports.WireframeGeometry=exports.VertexColors=exports.Vector4=exports.Vector3=exports.Vector2=exports.VSMShadowMap=exports.UnsignedShortType=exports.UnsignedShort565Type=exports.UnsignedShort5551Type=exports.UnsignedShort4444Type=exports.UnsignedIntType=exports.UnsignedInt248Type=exports.UnsignedByteType=exports.UniformsUtils=exports.UniformsLib=exports.Uniform=exports.UVMapping=exports.TubeGeometry=exports.TubeBufferGeometry=exports.TrianglesDrawMode=exports.TriangleStripDrawMode=exports.TriangleFanDrawMode=exports.Triangle=exports.TorusKnotGeometry=exports.TorusKnotBufferGeometry=exports.TorusGeometry=exports.TorusBufferGeometry=exports.TextGeometry=exports.TextBufferGeometry=exports.TetrahedronGeometry=exports.TetrahedronBufferGeometry=exports.TangentSpaceNormalMap=exports.TOUCH=exports.SubtractiveBlending=exports.SubtractEquation=exports.StreamReadUsage=exports.StreamDrawUsage=exports.StreamCopyUsage=exports.StaticReadUsage=exports.StaticDrawUsage=exports.StaticCopyUsage=exports.SrcColorFactor=exports.SrcAlphaSaturateFactor=exports.SrcAlphaFactor=exports.SpotLightHelper=exports.SphericalHarmonics3=exports.Spherical=exports.SphereGeometry=exports.SphereBufferGeometry=exports.Sphere=exports.SmoothShading=exports.SkeletonHelper=exports.ShortType=exports.ShapeUtils=exports.ShapeGeometry=exports.ShapeBufferGeometry=exports.ShaderLib=exports.ShaderChunk=exports.SceneUtils=exports.Scene=exports.SRGB8_ALPHA8_ASTC_8x8_Format=exports.SRGB8_ALPHA8_ASTC_8x6_Format=exports.SRGB8_ALPHA8_ASTC_8x5_Format=exports.SRGB8_ALPHA8_ASTC_6x6_Format=exports.SRGB8_ALPHA8_ASTC_6x5_Format=exports.SRGB8_ALPHA8_ASTC_5x5_Format=exports.SRGB8_ALPHA8_ASTC_5x4_Format=exports.SRGB8_ALPHA8_ASTC_4x4_Format=exports.SRGB8_ALPHA8_ASTC_12x12_Format=exports.SRGB8_ALPHA8_ASTC_12x10_Format=exports.SRGB8_ALPHA8_ASTC_10x8_Format=exports.SRGB8_ALPHA8_ASTC_10x6_Format=exports.SRGB8_ALPHA8_ASTC_10x5_Format=exports.SRGB8_ALPHA8_ASTC_10x10_Format=exports.RingGeometry=exports.RingBufferGeometry=exports.ReverseSubtractEquation=exports.ReplaceStencilOp=exports.RepeatWrapping=exports.ReinhardToneMapping=exports.RedIntegerFormat=exports.RedFormat=exports.Ray=exports.RGIntegerFormat=exports.RGFormat=exports.RGB_S3TC_DXT1_Format=exports.RGB_PVRTC_4BPPV1_Format=exports.RGB_PVRTC_2BPPV1_Format=exports.RGB_ETC2_Format=exports.RGB_ETC1_Format=exports.RGBM7Encoding=exports.RGBM16Encoding=exports.RGBIntegerFormat=exports.RGBFormat=exports.RGBEFormat=void 0;exports.sRGBEncoding=void 0;// threejs.org/license
 const REVISION='124';exports.REVISION=REVISION;const MOUSE={LEFT:0,MIDDLE:1,RIGHT:2,ROTATE:0,DOLLY:1,PAN:2};exports.MOUSE=MOUSE;const TOUCH={ROTATE:0,PAN:1,DOLLY_PAN:2,DOLLY_ROTATE:3};exports.TOUCH=TOUCH;const CullFaceNone=0;exports.CullFaceNone=CullFaceNone;const CullFaceBack=1;exports.CullFaceBack=CullFaceBack;const CullFaceFront=2;exports.CullFaceFront=CullFaceFront;const CullFaceFrontBack=3;exports.CullFaceFrontBack=CullFaceFrontBack;const BasicShadowMap=0;exports.BasicShadowMap=BasicShadowMap;const PCFShadowMap=1;exports.PCFShadowMap=PCFShadowMap;const PCFSoftShadowMap=2;exports.PCFSoftShadowMap=PCFSoftShadowMap;const VSMShadowMap=3;exports.VSMShadowMap=VSMShadowMap;const FrontSide=0;exports.FrontSide=FrontSide;const BackSide=1;exports.BackSide=BackSide;const DoubleSide=2;exports.DoubleSide=DoubleSide;const FlatShading=1;exports.FlatShading=FlatShading;const SmoothShading=2;exports.SmoothShading=SmoothShading;const NoBlending=0;exports.NoBlending=NoBlending;const NormalBlending=1;exports.NormalBlending=NormalBlending;const AdditiveBlending=2;exports.AdditiveBlending=AdditiveBlending;const SubtractiveBlending=3;exports.SubtractiveBlending=SubtractiveBlending;const MultiplyBlending=4;exports.MultiplyBlending=MultiplyBlending;const CustomBlending=5;exports.CustomBlending=CustomBlending;const AddEquation=100;exports.AddEquation=AddEquation;const SubtractEquation=101;exports.SubtractEquation=SubtractEquation;const ReverseSubtractEquation=102;exports.ReverseSubtractEquation=ReverseSubtractEquation;const MinEquation=103;exports.MinEquation=MinEquation;const MaxEquation=104;exports.MaxEquation=MaxEquation;const ZeroFactor=200;exports.ZeroFactor=ZeroFactor;const OneFactor=201;exports.OneFactor=OneFactor;const SrcColorFactor=202;exports.SrcColorFactor=SrcColorFactor;const OneMinusSrcColorFactor=203;exports.OneMinusSrcColorFactor=OneMinusSrcColorFactor;const SrcAlphaFactor=204;exports.SrcAlphaFactor=SrcAlphaFactor;const OneMinusSrcAlphaFactor=205;exports.OneMinusSrcAlphaFactor=OneMinusSrcAlphaFactor;const DstAlphaFactor=206;exports.DstAlphaFactor=DstAlphaFactor;const OneMinusDstAlphaFactor=207;exports.OneMinusDstAlphaFactor=OneMinusDstAlphaFactor;const DstColorFactor=208;exports.DstColorFactor=DstColorFactor;const OneMinusDstColorFactor=209;exports.OneMinusDstColorFactor=OneMinusDstColorFactor;const SrcAlphaSaturateFactor=210;exports.SrcAlphaSaturateFactor=SrcAlphaSaturateFactor;const NeverDepth=0;exports.NeverDepth=NeverDepth;const AlwaysDepth=1;exports.AlwaysDepth=AlwaysDepth;const LessDepth=2;exports.LessDepth=LessDepth;const LessEqualDepth=3;exports.LessEqualDepth=LessEqualDepth;const EqualDepth=4;exports.EqualDepth=EqualDepth;const GreaterEqualDepth=5;exports.GreaterEqualDepth=GreaterEqualDepth;const GreaterDepth=6;exports.GreaterDepth=GreaterDepth;const NotEqualDepth=7;exports.NotEqualDepth=NotEqualDepth;const MultiplyOperation=0;exports.MultiplyOperation=MultiplyOperation;const MixOperation=1;exports.MixOperation=MixOperation;const AddOperation=2;exports.AddOperation=AddOperation;const NoToneMapping=0;exports.NoToneMapping=NoToneMapping;const LinearToneMapping=1;exports.LinearToneMapping=LinearToneMapping;const ReinhardToneMapping=2;exports.ReinhardToneMapping=ReinhardToneMapping;const CineonToneMapping=3;exports.CineonToneMapping=CineonToneMapping;const ACESFilmicToneMapping=4;exports.ACESFilmicToneMapping=ACESFilmicToneMapping;const CustomToneMapping=5;exports.CustomToneMapping=CustomToneMapping;const UVMapping=300;exports.UVMapping=UVMapping;const CubeReflectionMapping=301;exports.CubeReflectionMapping=CubeReflectionMapping;const CubeRefractionMapping=302;exports.CubeRefractionMapping=CubeRefractionMapping;const EquirectangularReflectionMapping=303;exports.EquirectangularReflectionMapping=EquirectangularReflectionMapping;const EquirectangularRefractionMapping=304;exports.EquirectangularRefractionMapping=EquirectangularRefractionMapping;const CubeUVReflectionMapping=306;exports.CubeUVReflectionMapping=CubeUVReflectionMapping;const CubeUVRefractionMapping=307;exports.CubeUVRefractionMapping=CubeUVRefractionMapping;const RepeatWrapping=1000;exports.RepeatWrapping=RepeatWrapping;const ClampToEdgeWrapping=1001;exports.ClampToEdgeWrapping=ClampToEdgeWrapping;const MirroredRepeatWrapping=1002;exports.MirroredRepeatWrapping=MirroredRepeatWrapping;const NearestFilter=1003;exports.NearestFilter=NearestFilter;const NearestMipmapNearestFilter=1004;exports.NearestMipmapNearestFilter=NearestMipmapNearestFilter;const NearestMipMapNearestFilter=1004;exports.NearestMipMapNearestFilter=NearestMipMapNearestFilter;const NearestMipmapLinearFilter=1005;exports.NearestMipmapLinearFilter=NearestMipmapLinearFilter;const NearestMipMapLinearFilter=1005;exports.NearestMipMapLinearFilter=NearestMipMapLinearFilter;const LinearFilter=1006;exports.LinearFilter=LinearFilter;const LinearMipmapNearestFilter=1007;exports.LinearMipmapNearestFilter=LinearMipmapNearestFilter;const LinearMipMapNearestFilter=1007;exports.LinearMipMapNearestFilter=LinearMipMapNearestFilter;const LinearMipmapLinearFilter=1008;exports.LinearMipmapLinearFilter=LinearMipmapLinearFilter;const LinearMipMapLinearFilter=1008;exports.LinearMipMapLinearFilter=LinearMipMapLinearFilter;const UnsignedByteType=1009;exports.UnsignedByteType=UnsignedByteType;const ByteType=1010;exports.ByteType=ByteType;const ShortType=1011;exports.ShortType=ShortType;const UnsignedShortType=1012;exports.UnsignedShortType=UnsignedShortType;const IntType=1013;exports.IntType=IntType;const UnsignedIntType=1014;exports.UnsignedIntType=UnsignedIntType;const FloatType=1015;exports.FloatType=FloatType;const HalfFloatType=1016;exports.HalfFloatType=HalfFloatType;const UnsignedShort4444Type=1017;exports.UnsignedShort4444Type=UnsignedShort4444Type;const UnsignedShort5551Type=1018;exports.UnsignedShort5551Type=UnsignedShort5551Type;const UnsignedShort565Type=1019;exports.UnsignedShort565Type=UnsignedShort565Type;const UnsignedInt248Type=1020;exports.UnsignedInt248Type=UnsignedInt248Type;const AlphaFormat=1021;exports.AlphaFormat=AlphaFormat;const RGBFormat=1022;exports.RGBFormat=RGBFormat;const RGBAFormat=1023;exports.RGBAFormat=RGBAFormat;const LuminanceFormat=1024;exports.LuminanceFormat=LuminanceFormat;const LuminanceAlphaFormat=1025;exports.LuminanceAlphaFormat=LuminanceAlphaFormat;const RGBEFormat=RGBAFormat;exports.RGBEFormat=RGBEFormat;const DepthFormat=1026;exports.DepthFormat=DepthFormat;const DepthStencilFormat=1027;exports.DepthStencilFormat=DepthStencilFormat;const RedFormat=1028;exports.RedFormat=RedFormat;const RedIntegerFormat=1029;exports.RedIntegerFormat=RedIntegerFormat;const RGFormat=1030;exports.RGFormat=RGFormat;const RGIntegerFormat=1031;exports.RGIntegerFormat=RGIntegerFormat;const RGBIntegerFormat=1032;exports.RGBIntegerFormat=RGBIntegerFormat;const RGBAIntegerFormat=1033;exports.RGBAIntegerFormat=RGBAIntegerFormat;const RGB_S3TC_DXT1_Format=33776;exports.RGB_S3TC_DXT1_Format=RGB_S3TC_DXT1_Format;const RGBA_S3TC_DXT1_Format=33777;exports.RGBA_S3TC_DXT1_Format=RGBA_S3TC_DXT1_Format;const RGBA_S3TC_DXT3_Format=33778;exports.RGBA_S3TC_DXT3_Format=RGBA_S3TC_DXT3_Format;const RGBA_S3TC_DXT5_Format=33779;exports.RGBA_S3TC_DXT5_Format=RGBA_S3TC_DXT5_Format;const RGB_PVRTC_4BPPV1_Format=35840;exports.RGB_PVRTC_4BPPV1_Format=RGB_PVRTC_4BPPV1_Format;const RGB_PVRTC_2BPPV1_Format=35841;exports.RGB_PVRTC_2BPPV1_Format=RGB_PVRTC_2BPPV1_Format;const RGBA_PVRTC_4BPPV1_Format=35842;exports.RGBA_PVRTC_4BPPV1_Format=RGBA_PVRTC_4BPPV1_Format;const RGBA_PVRTC_2BPPV1_Format=35843;exports.RGBA_PVRTC_2BPPV1_Format=RGBA_PVRTC_2BPPV1_Format;const RGB_ETC1_Format=36196;exports.RGB_ETC1_Format=RGB_ETC1_Format;const RGB_ETC2_Format=37492;exports.RGB_ETC2_Format=RGB_ETC2_Format;const RGBA_ETC2_EAC_Format=37496;exports.RGBA_ETC2_EAC_Format=RGBA_ETC2_EAC_Format;const RGBA_ASTC_4x4_Format=37808;exports.RGBA_ASTC_4x4_Format=RGBA_ASTC_4x4_Format;const RGBA_ASTC_5x4_Format=37809;exports.RGBA_ASTC_5x4_Format=RGBA_ASTC_5x4_Format;const RGBA_ASTC_5x5_Format=37810;exports.RGBA_ASTC_5x5_Format=RGBA_ASTC_5x5_Format;const RGBA_ASTC_6x5_Format=37811;exports.RGBA_ASTC_6x5_Format=RGBA_ASTC_6x5_Format;const RGBA_ASTC_6x6_Format=37812;exports.RGBA_ASTC_6x6_Format=RGBA_ASTC_6x6_Format;const RGBA_ASTC_8x5_Format=37813;exports.RGBA_ASTC_8x5_Format=RGBA_ASTC_8x5_Format;const RGBA_ASTC_8x6_Format=37814;exports.RGBA_ASTC_8x6_Format=RGBA_ASTC_8x6_Format;const RGBA_ASTC_8x8_Format=37815;exports.RGBA_ASTC_8x8_Format=RGBA_ASTC_8x8_Format;const RGBA_ASTC_10x5_Format=37816;exports.RGBA_ASTC_10x5_Format=RGBA_ASTC_10x5_Format;const RGBA_ASTC_10x6_Format=37817;exports.RGBA_ASTC_10x6_Format=RGBA_ASTC_10x6_Format;const RGBA_ASTC_10x8_Format=37818;exports.RGBA_ASTC_10x8_Format=RGBA_ASTC_10x8_Format;const RGBA_ASTC_10x10_Format=37819;exports.RGBA_ASTC_10x10_Format=RGBA_ASTC_10x10_Format;const RGBA_ASTC_12x10_Format=37820;exports.RGBA_ASTC_12x10_Format=RGBA_ASTC_12x10_Format;const RGBA_ASTC_12x12_Format=37821;exports.RGBA_ASTC_12x12_Format=RGBA_ASTC_12x12_Format;const RGBA_BPTC_Format=36492;exports.RGBA_BPTC_Format=RGBA_BPTC_Format;const SRGB8_ALPHA8_ASTC_4x4_Format=37840;exports.SRGB8_ALPHA8_ASTC_4x4_Format=SRGB8_ALPHA8_ASTC_4x4_Format;const SRGB8_ALPHA8_ASTC_5x4_Format=37841;exports.SRGB8_ALPHA8_ASTC_5x4_Format=SRGB8_ALPHA8_ASTC_5x4_Format;const SRGB8_ALPHA8_ASTC_5x5_Format=37842;exports.SRGB8_ALPHA8_ASTC_5x5_Format=SRGB8_ALPHA8_ASTC_5x5_Format;const SRGB8_ALPHA8_ASTC_6x5_Format=37843;exports.SRGB8_ALPHA8_ASTC_6x5_Format=SRGB8_ALPHA8_ASTC_6x5_Format;const SRGB8_ALPHA8_ASTC_6x6_Format=37844;exports.SRGB8_ALPHA8_ASTC_6x6_Format=SRGB8_ALPHA8_ASTC_6x6_Format;const SRGB8_ALPHA8_ASTC_8x5_Format=37845;exports.SRGB8_ALPHA8_ASTC_8x5_Format=SRGB8_ALPHA8_ASTC_8x5_Format;const SRGB8_ALPHA8_ASTC_8x6_Format=37846;exports.SRGB8_ALPHA8_ASTC_8x6_Format=SRGB8_ALPHA8_ASTC_8x6_Format;const SRGB8_ALPHA8_ASTC_8x8_Format=37847;exports.SRGB8_ALPHA8_ASTC_8x8_Format=SRGB8_ALPHA8_ASTC_8x8_Format;const SRGB8_ALPHA8_ASTC_10x5_Format=37848;exports.SRGB8_ALPHA8_ASTC_10x5_Format=SRGB8_ALPHA8_ASTC_10x5_Format;const SRGB8_ALPHA8_ASTC_10x6_Format=37849;exports.SRGB8_ALPHA8_ASTC_10x6_Format=SRGB8_ALPHA8_ASTC_10x6_Format;const SRGB8_ALPHA8_ASTC_10x8_Format=37850;exports.SRGB8_ALPHA8_ASTC_10x8_Format=SRGB8_ALPHA8_ASTC_10x8_Format;const SRGB8_ALPHA8_ASTC_10x10_Format=37851;exports.SRGB8_ALPHA8_ASTC_10x10_Format=SRGB8_ALPHA8_ASTC_10x10_Format;const SRGB8_ALPHA8_ASTC_12x10_Format=37852;exports.SRGB8_ALPHA8_ASTC_12x10_Format=SRGB8_ALPHA8_ASTC_12x10_Format;const SRGB8_ALPHA8_ASTC_12x12_Format=37853;exports.SRGB8_ALPHA8_ASTC_12x12_Format=SRGB8_ALPHA8_ASTC_12x12_Format;const LoopOnce=2200;exports.LoopOnce=LoopOnce;const LoopRepeat=2201;exports.LoopRepeat=LoopRepeat;const LoopPingPong=2202;exports.LoopPingPong=LoopPingPong;const InterpolateDiscrete=2300;exports.InterpolateDiscrete=InterpolateDiscrete;const InterpolateLinear=2301;exports.InterpolateLinear=InterpolateLinear;const InterpolateSmooth=2302;exports.InterpolateSmooth=InterpolateSmooth;const ZeroCurvatureEnding=2400;exports.ZeroCurvatureEnding=ZeroCurvatureEnding;const ZeroSlopeEnding=2401;exports.ZeroSlopeEnding=ZeroSlopeEnding;const WrapAroundEnding=2402;exports.WrapAroundEnding=WrapAroundEnding;const NormalAnimationBlendMode=2500;exports.NormalAnimationBlendMode=NormalAnimationBlendMode;const AdditiveAnimationBlendMode=2501;exports.AdditiveAnimationBlendMode=AdditiveAnimationBlendMode;const TrianglesDrawMode=0;exports.TrianglesDrawMode=TrianglesDrawMode;const TriangleStripDrawMode=1;exports.TriangleStripDrawMode=TriangleStripDrawMode;const TriangleFanDrawMode=2;exports.TriangleFanDrawMode=TriangleFanDrawMode;const LinearEncoding=3000;exports.LinearEncoding=LinearEncoding;const sRGBEncoding=3001;exports.sRGBEncoding=sRGBEncoding;const GammaEncoding=3007;exports.GammaEncoding=GammaEncoding;const RGBEEncoding=3002;exports.RGBEEncoding=RGBEEncoding;const LogLuvEncoding=3003;exports.LogLuvEncoding=LogLuvEncoding;const RGBM7Encoding=3004;exports.RGBM7Encoding=RGBM7Encoding;const RGBM16Encoding=3005;exports.RGBM16Encoding=RGBM16Encoding;const RGBDEncoding=3006;exports.RGBDEncoding=RGBDEncoding;const BasicDepthPacking=3200;exports.BasicDepthPacking=BasicDepthPacking;const RGBADepthPacking=3201;exports.RGBADepthPacking=RGBADepthPacking;const TangentSpaceNormalMap=0;exports.TangentSpaceNormalMap=TangentSpaceNormalMap;const ObjectSpaceNormalMap=1;exports.ObjectSpaceNormalMap=ObjectSpaceNormalMap;const ZeroStencilOp=0;exports.ZeroStencilOp=ZeroStencilOp;const KeepStencilOp=7680;exports.KeepStencilOp=KeepStencilOp;const ReplaceStencilOp=7681;exports.ReplaceStencilOp=ReplaceStencilOp;const IncrementStencilOp=7682;exports.IncrementStencilOp=IncrementStencilOp;const DecrementStencilOp=7683;exports.DecrementStencilOp=DecrementStencilOp;const IncrementWrapStencilOp=34055;exports.IncrementWrapStencilOp=IncrementWrapStencilOp;const DecrementWrapStencilOp=34056;exports.DecrementWrapStencilOp=DecrementWrapStencilOp;const InvertStencilOp=5386;exports.InvertStencilOp=InvertStencilOp;const NeverStencilFunc=512;exports.NeverStencilFunc=NeverStencilFunc;const LessStencilFunc=513;exports.LessStencilFunc=LessStencilFunc;const EqualStencilFunc=514;exports.EqualStencilFunc=EqualStencilFunc;const LessEqualStencilFunc=515;exports.LessEqualStencilFunc=LessEqualStencilFunc;const GreaterStencilFunc=516;exports.GreaterStencilFunc=GreaterStencilFunc;const NotEqualStencilFunc=517;exports.NotEqualStencilFunc=NotEqualStencilFunc;const GreaterEqualStencilFunc=518;exports.GreaterEqualStencilFunc=GreaterEqualStencilFunc;const AlwaysStencilFunc=519;exports.AlwaysStencilFunc=AlwaysStencilFunc;const StaticDrawUsage=35044;exports.StaticDrawUsage=StaticDrawUsage;const DynamicDrawUsage=35048;exports.DynamicDrawUsage=DynamicDrawUsage;const StreamDrawUsage=35040;exports.StreamDrawUsage=StreamDrawUsage;const StaticReadUsage=35045;exports.StaticReadUsage=StaticReadUsage;const DynamicReadUsage=35049;exports.DynamicReadUsage=DynamicReadUsage;const StreamReadUsage=35041;exports.StreamReadUsage=StreamReadUsage;const StaticCopyUsage=35046;exports.StaticCopyUsage=StaticCopyUsage;const DynamicCopyUsage=35050;exports.DynamicCopyUsage=DynamicCopyUsage;const StreamCopyUsage=35042;exports.StreamCopyUsage=StreamCopyUsage;const GLSL1='100';exports.GLSL1=GLSL1;const GLSL3='300 es';/**
  * https://github.com/mrdoob/eventdispatcher.js/
@@ -5843,7 +6480,7 @@ function JSONLoader(){console.error('THREE.JSONLoader has been removed.');}//
 const SceneUtils={createMultiMaterialObject:function()/* geometry, materials */{console.error('THREE.SceneUtils has been moved to /examples/jsm/utils/SceneUtils.js');},detach:function()/* child, parent, scene */{console.error('THREE.SceneUtils has been moved to /examples/jsm/utils/SceneUtils.js');},attach:function()/* child, scene, parent */{console.error('THREE.SceneUtils has been moved to /examples/jsm/utils/SceneUtils.js');}};//
 exports.SceneUtils=SceneUtils;function LensFlare(){console.error('THREE.LensFlare has been moved to /examples/jsm/objects/Lensflare.js');}if(typeof __THREE_DEVTOOLS__!=='undefined'){/* eslint-disable no-undef */__THREE_DEVTOOLS__.dispatchEvent(new CustomEvent('register',{detail:{revision:REVISION}}));/* eslint-enable no-undef */}
 
-},{}],102:[function(require,module,exports){
+},{}],129:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -6673,7 +7310,7 @@ exports.MapControls = MapControls;
 MapControls.prototype = Object.create(_threeModule.EventDispatcher.prototype);
 MapControls.prototype.constructor = MapControls;
 
-},{"../../../build/three.module.js":101}],103:[function(require,module,exports){
+},{"../../../build/three.module.js":128}],130:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -6747,7 +7384,7 @@ NURBSCurve.prototype.getTangent = function (t, optionalTarget) {
   return tangent;
 };
 
-},{"../../../build/three.module.js":101,"../curves/NURBSUtils.js":104}],104:[function(require,module,exports){
+},{"../../../build/three.module.js":128,"../curves/NURBSUtils.js":131}],131:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -7113,7 +7750,7 @@ var NURBSUtils = {
 };
 exports.NURBSUtils = NURBSUtils;
 
-},{"../../../build/three.module.js":101}],105:[function(require,module,exports){
+},{"../../../build/three.module.js":128}],132:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -7574,7 +8211,7 @@ for (ia = Y.length; $ < ia; ++$) Z = Y[$], r("Zlib.Inflate.BufferType." + Z, X[Z
 var Inflate = mod.Zlib.Inflate;
 exports.Inflate = Inflate;
 
-},{}],106:[function(require,module,exports){
+},{}],133:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -8055,7 +8692,7 @@ DRACOLoader.getDecoderModule = function () {
   console.warn('THREE.DRACOLoader: The .getDecoderModule() method has been removed. Use instance methods.');
 };
 
-},{"../../../build/three.module.js":101}],107:[function(require,module,exports){
+},{"../../../build/three.module.js":128}],134:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -10920,7 +11557,7 @@ var FBXLoader = function () {
 
 exports.FBXLoader = FBXLoader;
 
-},{"../../../build/three.module.js":101,"../curves/NURBSCurve.js":103,"../libs/inflate.module.min.js":105}],108:[function(require,module,exports){
+},{"../../../build/three.module.js":128,"../curves/NURBSCurve.js":130,"../libs/inflate.module.min.js":132}],135:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -13672,7 +14309,677 @@ var GLTFLoader = function () {
 
 exports.GLTFLoader = GLTFLoader;
 
-},{"../../../build/three.module.js":101}],109:[function(require,module,exports){
+},{"../../../build/three.module.js":128}],136:[function(require,module,exports){
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.BokehPass = void 0;
+
+var _threeModule = require("../../../build/three.module.js");
+
+var _Pass = require("../postprocessing/Pass.js");
+
+var _BokehShader = require("../shaders/BokehShader.js");
+
+/**
+ * Depth-of-field post-process with bokeh shader
+ */
+var BokehPass = function (scene, camera, params) {
+  _Pass.Pass.call(this);
+
+  this.scene = scene;
+  this.camera = camera;
+  var focus = params.focus !== undefined ? params.focus : 1.0;
+  var aspect = params.aspect !== undefined ? params.aspect : camera.aspect;
+  var aperture = params.aperture !== undefined ? params.aperture : 0.025;
+  var maxblur = params.maxblur !== undefined ? params.maxblur : 1.0; // render targets
+
+  var width = params.width || window.innerWidth || 1;
+  var height = params.height || window.innerHeight || 1;
+  this.renderTargetDepth = new _threeModule.WebGLRenderTarget(width, height, {
+    minFilter: _threeModule.NearestFilter,
+    magFilter: _threeModule.NearestFilter
+  });
+  this.renderTargetDepth.texture.name = 'BokehPass.depth'; // depth material
+
+  this.materialDepth = new _threeModule.MeshDepthMaterial();
+  this.materialDepth.depthPacking = _threeModule.RGBADepthPacking;
+  this.materialDepth.blending = _threeModule.NoBlending; // bokeh material
+
+  if (_BokehShader.BokehShader === undefined) {
+    console.error('THREE.BokehPass relies on BokehShader');
+  }
+
+  var bokehShader = _BokehShader.BokehShader;
+
+  var bokehUniforms = _threeModule.UniformsUtils.clone(bokehShader.uniforms);
+
+  bokehUniforms['tDepth'].value = this.renderTargetDepth.texture;
+  bokehUniforms['focus'].value = focus;
+  bokehUniforms['aspect'].value = aspect;
+  bokehUniforms['aperture'].value = aperture;
+  bokehUniforms['maxblur'].value = maxblur;
+  bokehUniforms['nearClip'].value = camera.near;
+  bokehUniforms['farClip'].value = camera.far;
+  this.materialBokeh = new _threeModule.ShaderMaterial({
+    defines: Object.assign({}, bokehShader.defines),
+    uniforms: bokehUniforms,
+    vertexShader: bokehShader.vertexShader,
+    fragmentShader: bokehShader.fragmentShader
+  });
+  this.uniforms = bokehUniforms;
+  this.needsSwap = false;
+  this.fsQuad = new _Pass.Pass.FullScreenQuad(this.materialBokeh);
+  this._oldClearColor = new _threeModule.Color();
+};
+
+exports.BokehPass = BokehPass;
+BokehPass.prototype = Object.assign(Object.create(_Pass.Pass.prototype), {
+  constructor: BokehPass,
+  render: function (renderer, writeBuffer, readBuffer
+  /*, deltaTime, maskActive*/
+  ) {
+    // Render depth into texture
+    this.scene.overrideMaterial = this.materialDepth;
+    renderer.getClearColor(this._oldClearColor);
+    var oldClearAlpha = renderer.getClearAlpha();
+    var oldAutoClear = renderer.autoClear;
+    renderer.autoClear = false;
+    renderer.setClearColor(0xffffff);
+    renderer.setClearAlpha(1.0);
+    renderer.setRenderTarget(this.renderTargetDepth);
+    renderer.clear();
+    renderer.render(this.scene, this.camera); // Render bokeh composite
+
+    this.uniforms['tColor'].value = readBuffer.texture;
+    this.uniforms['nearClip'].value = this.camera.near;
+    this.uniforms['farClip'].value = this.camera.far;
+
+    if (this.renderToScreen) {
+      renderer.setRenderTarget(null);
+      this.fsQuad.render(renderer);
+    } else {
+      renderer.setRenderTarget(writeBuffer);
+      renderer.clear();
+      this.fsQuad.render(renderer);
+    }
+
+    this.scene.overrideMaterial = null;
+    renderer.setClearColor(this._oldClearColor);
+    renderer.setClearAlpha(oldClearAlpha);
+    renderer.autoClear = oldAutoClear;
+  }
+});
+
+},{"../../../build/three.module.js":128,"../postprocessing/Pass.js":139,"../shaders/BokehShader.js":142}],137:[function(require,module,exports){
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.Pass = exports.EffectComposer = void 0;
+
+var _threeModule = require("../../../build/three.module.js");
+
+var _CopyShader = require("../shaders/CopyShader.js");
+
+var _ShaderPass = require("../postprocessing/ShaderPass.js");
+
+var _MaskPass = require("../postprocessing/MaskPass.js");
+
+var EffectComposer = function (renderer, renderTarget) {
+  this.renderer = renderer;
+
+  if (renderTarget === undefined) {
+    var parameters = {
+      minFilter: _threeModule.LinearFilter,
+      magFilter: _threeModule.LinearFilter,
+      format: _threeModule.RGBAFormat
+    };
+    var size = renderer.getSize(new _threeModule.Vector2());
+    this._pixelRatio = renderer.getPixelRatio();
+    this._width = size.width;
+    this._height = size.height;
+    renderTarget = new _threeModule.WebGLRenderTarget(this._width * this._pixelRatio, this._height * this._pixelRatio, parameters);
+    renderTarget.texture.name = 'EffectComposer.rt1';
+  } else {
+    this._pixelRatio = 1;
+    this._width = renderTarget.width;
+    this._height = renderTarget.height;
+  }
+
+  this.renderTarget1 = renderTarget;
+  this.renderTarget2 = renderTarget.clone();
+  this.renderTarget2.texture.name = 'EffectComposer.rt2';
+  this.writeBuffer = this.renderTarget1;
+  this.readBuffer = this.renderTarget2;
+  this.renderToScreen = true;
+  this.passes = []; // dependencies
+
+  if (_CopyShader.CopyShader === undefined) {
+    console.error('THREE.EffectComposer relies on CopyShader');
+  }
+
+  if (_ShaderPass.ShaderPass === undefined) {
+    console.error('THREE.EffectComposer relies on ShaderPass');
+  }
+
+  this.copyPass = new _ShaderPass.ShaderPass(_CopyShader.CopyShader);
+  this.clock = new _threeModule.Clock();
+};
+
+exports.EffectComposer = EffectComposer;
+Object.assign(EffectComposer.prototype, {
+  swapBuffers: function () {
+    var tmp = this.readBuffer;
+    this.readBuffer = this.writeBuffer;
+    this.writeBuffer = tmp;
+  },
+  addPass: function (pass) {
+    this.passes.push(pass);
+    pass.setSize(this._width * this._pixelRatio, this._height * this._pixelRatio);
+  },
+  insertPass: function (pass, index) {
+    this.passes.splice(index, 0, pass);
+    pass.setSize(this._width * this._pixelRatio, this._height * this._pixelRatio);
+  },
+  removePass: function (pass) {
+    const index = this.passes.indexOf(pass);
+
+    if (index !== -1) {
+      this.passes.splice(index, 1);
+    }
+  },
+  isLastEnabledPass: function (passIndex) {
+    for (var i = passIndex + 1; i < this.passes.length; i++) {
+      if (this.passes[i].enabled) {
+        return false;
+      }
+    }
+
+    return true;
+  },
+  render: function (deltaTime) {
+    // deltaTime value is in seconds
+    if (deltaTime === undefined) {
+      deltaTime = this.clock.getDelta();
+    }
+
+    var currentRenderTarget = this.renderer.getRenderTarget();
+    var maskActive = false;
+    var pass,
+        i,
+        il = this.passes.length;
+
+    for (i = 0; i < il; i++) {
+      pass = this.passes[i];
+      if (pass.enabled === false) continue;
+      pass.renderToScreen = this.renderToScreen && this.isLastEnabledPass(i);
+      pass.render(this.renderer, this.writeBuffer, this.readBuffer, deltaTime, maskActive);
+
+      if (pass.needsSwap) {
+        if (maskActive) {
+          var context = this.renderer.getContext();
+          var stencil = this.renderer.state.buffers.stencil; //context.stencilFunc( context.NOTEQUAL, 1, 0xffffffff );
+
+          stencil.setFunc(context.NOTEQUAL, 1, 0xffffffff);
+          this.copyPass.render(this.renderer, this.writeBuffer, this.readBuffer, deltaTime); //context.stencilFunc( context.EQUAL, 1, 0xffffffff );
+
+          stencil.setFunc(context.EQUAL, 1, 0xffffffff);
+        }
+
+        this.swapBuffers();
+      }
+
+      if (_MaskPass.MaskPass !== undefined) {
+        if (pass instanceof _MaskPass.MaskPass) {
+          maskActive = true;
+        } else if (pass instanceof _MaskPass.ClearMaskPass) {
+          maskActive = false;
+        }
+      }
+    }
+
+    this.renderer.setRenderTarget(currentRenderTarget);
+  },
+  reset: function (renderTarget) {
+    if (renderTarget === undefined) {
+      var size = this.renderer.getSize(new _threeModule.Vector2());
+      this._pixelRatio = this.renderer.getPixelRatio();
+      this._width = size.width;
+      this._height = size.height;
+      renderTarget = this.renderTarget1.clone();
+      renderTarget.setSize(this._width * this._pixelRatio, this._height * this._pixelRatio);
+    }
+
+    this.renderTarget1.dispose();
+    this.renderTarget2.dispose();
+    this.renderTarget1 = renderTarget;
+    this.renderTarget2 = renderTarget.clone();
+    this.writeBuffer = this.renderTarget1;
+    this.readBuffer = this.renderTarget2;
+  },
+  setSize: function (width, height) {
+    this._width = width;
+    this._height = height;
+    var effectiveWidth = this._width * this._pixelRatio;
+    var effectiveHeight = this._height * this._pixelRatio;
+    this.renderTarget1.setSize(effectiveWidth, effectiveHeight);
+    this.renderTarget2.setSize(effectiveWidth, effectiveHeight);
+
+    for (var i = 0; i < this.passes.length; i++) {
+      this.passes[i].setSize(effectiveWidth, effectiveHeight);
+    }
+  },
+  setPixelRatio: function (pixelRatio) {
+    this._pixelRatio = pixelRatio;
+    this.setSize(this._width, this._height);
+  }
+});
+
+var Pass = function () {
+  // if set to true, the pass is processed by the composer
+  this.enabled = true; // if set to true, the pass indicates to swap read and write buffer after rendering
+
+  this.needsSwap = true; // if set to true, the pass clears its buffer before rendering
+
+  this.clear = false; // if set to true, the result of the pass is rendered to screen. This is set automatically by EffectComposer.
+
+  this.renderToScreen = false;
+};
+
+exports.Pass = Pass;
+Object.assign(Pass.prototype, {
+  setSize: function ()
+  /* width, height */
+  {},
+  render: function ()
+  /* renderer, writeBuffer, readBuffer, deltaTime, maskActive */
+  {
+    console.error('THREE.Pass: .render() must be implemented in derived pass.');
+  }
+}); // Helper for passes that need to fill the viewport with a single quad.
+
+Pass.FullScreenQuad = function () {
+  var camera = new _threeModule.OrthographicCamera(-1, 1, 1, -1, 0, 1);
+  var geometry = new _threeModule.PlaneBufferGeometry(2, 2);
+
+  var FullScreenQuad = function (material) {
+    this._mesh = new _threeModule.Mesh(geometry, material);
+  };
+
+  Object.defineProperty(FullScreenQuad.prototype, 'material', {
+    get: function () {
+      return this._mesh.material;
+    },
+    set: function (value) {
+      this._mesh.material = value;
+    }
+  });
+  Object.assign(FullScreenQuad.prototype, {
+    dispose: function () {
+      this._mesh.geometry.dispose();
+    },
+    render: function (renderer) {
+      renderer.render(this._mesh, camera);
+    }
+  });
+  return FullScreenQuad;
+}();
+
+},{"../../../build/three.module.js":128,"../postprocessing/MaskPass.js":138,"../postprocessing/ShaderPass.js":141,"../shaders/CopyShader.js":143}],138:[function(require,module,exports){
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.ClearMaskPass = exports.MaskPass = void 0;
+
+var _Pass = require("../postprocessing/Pass.js");
+
+var MaskPass = function (scene, camera) {
+  _Pass.Pass.call(this);
+
+  this.scene = scene;
+  this.camera = camera;
+  this.clear = true;
+  this.needsSwap = false;
+  this.inverse = false;
+};
+
+exports.MaskPass = MaskPass;
+MaskPass.prototype = Object.assign(Object.create(_Pass.Pass.prototype), {
+  constructor: MaskPass,
+  render: function (renderer, writeBuffer, readBuffer
+  /*, deltaTime, maskActive */
+  ) {
+    var context = renderer.getContext();
+    var state = renderer.state; // don't update color or depth
+
+    state.buffers.color.setMask(false);
+    state.buffers.depth.setMask(false); // lock buffers
+
+    state.buffers.color.setLocked(true);
+    state.buffers.depth.setLocked(true); // set up stencil
+
+    var writeValue, clearValue;
+
+    if (this.inverse) {
+      writeValue = 0;
+      clearValue = 1;
+    } else {
+      writeValue = 1;
+      clearValue = 0;
+    }
+
+    state.buffers.stencil.setTest(true);
+    state.buffers.stencil.setOp(context.REPLACE, context.REPLACE, context.REPLACE);
+    state.buffers.stencil.setFunc(context.ALWAYS, writeValue, 0xffffffff);
+    state.buffers.stencil.setClear(clearValue);
+    state.buffers.stencil.setLocked(true); // draw into the stencil buffer
+
+    renderer.setRenderTarget(readBuffer);
+    if (this.clear) renderer.clear();
+    renderer.render(this.scene, this.camera);
+    renderer.setRenderTarget(writeBuffer);
+    if (this.clear) renderer.clear();
+    renderer.render(this.scene, this.camera); // unlock color and depth buffer for subsequent rendering
+
+    state.buffers.color.setLocked(false);
+    state.buffers.depth.setLocked(false); // only render where stencil is set to 1
+
+    state.buffers.stencil.setLocked(false);
+    state.buffers.stencil.setFunc(context.EQUAL, 1, 0xffffffff); // draw if == 1
+
+    state.buffers.stencil.setOp(context.KEEP, context.KEEP, context.KEEP);
+    state.buffers.stencil.setLocked(true);
+  }
+});
+
+var ClearMaskPass = function () {
+  _Pass.Pass.call(this);
+
+  this.needsSwap = false;
+};
+
+exports.ClearMaskPass = ClearMaskPass;
+ClearMaskPass.prototype = Object.create(_Pass.Pass.prototype);
+Object.assign(ClearMaskPass.prototype, {
+  render: function (renderer
+  /*, writeBuffer, readBuffer, deltaTime, maskActive */
+  ) {
+    renderer.state.buffers.stencil.setLocked(false);
+    renderer.state.buffers.stencil.setTest(false);
+  }
+});
+
+},{"../postprocessing/Pass.js":139}],139:[function(require,module,exports){
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.Pass = Pass;
+
+var _threeModule = require("../../../build/three.module.js");
+
+function Pass() {
+  // if set to true, the pass is processed by the composer
+  this.enabled = true; // if set to true, the pass indicates to swap read and write buffer after rendering
+
+  this.needsSwap = true; // if set to true, the pass clears its buffer before rendering
+
+  this.clear = false; // if set to true, the result of the pass is rendered to screen. This is set automatically by EffectComposer.
+
+  this.renderToScreen = false;
+}
+
+Object.assign(Pass.prototype, {
+  setSize: function ()
+  /* width, height */
+  {},
+  render: function ()
+  /* renderer, writeBuffer, readBuffer, deltaTime, maskActive */
+  {
+    console.error('THREE.Pass: .render() must be implemented in derived pass.');
+  }
+}); // Helper for passes that need to fill the viewport with a single quad.
+// Important: It's actually a hack to put FullScreenQuad into the Pass namespace. This is only
+// done to make examples/js code work. Normally, FullScreenQuad should be exported
+// from this module like Pass.
+
+Pass.FullScreenQuad = function () {
+  var camera = new _threeModule.OrthographicCamera(-1, 1, 1, -1, 0, 1);
+  var geometry = new _threeModule.PlaneBufferGeometry(2, 2);
+
+  var FullScreenQuad = function (material) {
+    this._mesh = new _threeModule.Mesh(geometry, material);
+  };
+
+  Object.defineProperty(FullScreenQuad.prototype, 'material', {
+    get: function () {
+      return this._mesh.material;
+    },
+    set: function (value) {
+      this._mesh.material = value;
+    }
+  });
+  Object.assign(FullScreenQuad.prototype, {
+    dispose: function () {
+      this._mesh.geometry.dispose();
+    },
+    render: function (renderer) {
+      renderer.render(this._mesh, camera);
+    }
+  });
+  return FullScreenQuad;
+}();
+
+},{"../../../build/three.module.js":128}],140:[function(require,module,exports){
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.RenderPass = void 0;
+
+var _threeModule = require("../../../build/three.module.js");
+
+var _Pass = require("../postprocessing/Pass.js");
+
+var RenderPass = function (scene, camera, overrideMaterial, clearColor, clearAlpha) {
+  _Pass.Pass.call(this);
+
+  this.scene = scene;
+  this.camera = camera;
+  this.overrideMaterial = overrideMaterial;
+  this.clearColor = clearColor;
+  this.clearAlpha = clearAlpha !== undefined ? clearAlpha : 0;
+  this.clear = true;
+  this.clearDepth = false;
+  this.needsSwap = false;
+  this._oldClearColor = new _threeModule.Color();
+};
+
+exports.RenderPass = RenderPass;
+RenderPass.prototype = Object.assign(Object.create(_Pass.Pass.prototype), {
+  constructor: RenderPass,
+  render: function (renderer, writeBuffer, readBuffer
+  /*, deltaTime, maskActive */
+  ) {
+    var oldAutoClear = renderer.autoClear;
+    renderer.autoClear = false;
+    var oldClearAlpha, oldOverrideMaterial;
+
+    if (this.overrideMaterial !== undefined) {
+      oldOverrideMaterial = this.scene.overrideMaterial;
+      this.scene.overrideMaterial = this.overrideMaterial;
+    }
+
+    if (this.clearColor) {
+      renderer.getClearColor(this._oldClearColor);
+      oldClearAlpha = renderer.getClearAlpha();
+      renderer.setClearColor(this.clearColor, this.clearAlpha);
+    }
+
+    if (this.clearDepth) {
+      renderer.clearDepth();
+    }
+
+    renderer.setRenderTarget(this.renderToScreen ? null : readBuffer); // TODO: Avoid using autoClear properties, see https://github.com/mrdoob/three.js/pull/15571#issuecomment-465669600
+
+    if (this.clear) renderer.clear(renderer.autoClearColor, renderer.autoClearDepth, renderer.autoClearStencil);
+    renderer.render(this.scene, this.camera);
+
+    if (this.clearColor) {
+      renderer.setClearColor(this._oldClearColor, oldClearAlpha);
+    }
+
+    if (this.overrideMaterial !== undefined) {
+      this.scene.overrideMaterial = oldOverrideMaterial;
+    }
+
+    renderer.autoClear = oldAutoClear;
+  }
+});
+
+},{"../../../build/three.module.js":128,"../postprocessing/Pass.js":139}],141:[function(require,module,exports){
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.ShaderPass = void 0;
+
+var _threeModule = require("../../../build/three.module.js");
+
+var _Pass = require("../postprocessing/Pass.js");
+
+var ShaderPass = function (shader, textureID) {
+  _Pass.Pass.call(this);
+
+  this.textureID = textureID !== undefined ? textureID : 'tDiffuse';
+
+  if (shader instanceof _threeModule.ShaderMaterial) {
+    this.uniforms = shader.uniforms;
+    this.material = shader;
+  } else if (shader) {
+    this.uniforms = _threeModule.UniformsUtils.clone(shader.uniforms);
+    this.material = new _threeModule.ShaderMaterial({
+      defines: Object.assign({}, shader.defines),
+      uniforms: this.uniforms,
+      vertexShader: shader.vertexShader,
+      fragmentShader: shader.fragmentShader
+    });
+  }
+
+  this.fsQuad = new _Pass.Pass.FullScreenQuad(this.material);
+};
+
+exports.ShaderPass = ShaderPass;
+ShaderPass.prototype = Object.assign(Object.create(_Pass.Pass.prototype), {
+  constructor: ShaderPass,
+  render: function (renderer, writeBuffer, readBuffer
+  /*, deltaTime, maskActive */
+  ) {
+    if (this.uniforms[this.textureID]) {
+      this.uniforms[this.textureID].value = readBuffer.texture;
+    }
+
+    this.fsQuad.material = this.material;
+
+    if (this.renderToScreen) {
+      renderer.setRenderTarget(null);
+      this.fsQuad.render(renderer);
+    } else {
+      renderer.setRenderTarget(writeBuffer); // TODO: Avoid using autoClear properties, see https://github.com/mrdoob/three.js/pull/15571#issuecomment-465669600
+
+      if (this.clear) renderer.clear(renderer.autoClearColor, renderer.autoClearDepth, renderer.autoClearStencil);
+      this.fsQuad.render(renderer);
+    }
+  }
+});
+
+},{"../../../build/three.module.js":128,"../postprocessing/Pass.js":139}],142:[function(require,module,exports){
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.BokehShader = void 0;
+
+/**
+ * Depth-of-field shader with bokeh
+ * ported from GLSL shader by Martins Upitis
+ * http://artmartinsh.blogspot.com/2010/02/glsl-lens-blur-filter-with-bokeh.html
+ */
+var BokehShader = {
+  defines: {
+    'DEPTH_PACKING': 1,
+    'PERSPECTIVE_CAMERA': 1
+  },
+  uniforms: {
+    'tColor': {
+      value: null
+    },
+    'tDepth': {
+      value: null
+    },
+    'focus': {
+      value: 1.0
+    },
+    'aspect': {
+      value: 1.0
+    },
+    'aperture': {
+      value: 0.025
+    },
+    'maxblur': {
+      value: 0.01
+    },
+    'nearClip': {
+      value: 1.0
+    },
+    'farClip': {
+      value: 1000.0
+    }
+  },
+  vertexShader: ['varying vec2 vUv;', 'void main() {', '	vUv = uv;', '	gl_Position = projectionMatrix * modelViewMatrix * vec4( position, 1.0 );', '}'].join('\n'),
+  fragmentShader: ['#include <common>', 'varying vec2 vUv;', 'uniform sampler2D tColor;', 'uniform sampler2D tDepth;', 'uniform float maxblur;', // max blur amount
+  'uniform float aperture;', // aperture - bigger values for shallower depth of field
+  'uniform float nearClip;', 'uniform float farClip;', 'uniform float focus;', 'uniform float aspect;', '#include <packing>', 'float getDepth( const in vec2 screenPosition ) {', '	#if DEPTH_PACKING == 1', '	return unpackRGBAToDepth( texture2D( tDepth, screenPosition ) );', '	#else', '	return texture2D( tDepth, screenPosition ).x;', '	#endif', '}', 'float getViewZ( const in float depth ) {', '	#if PERSPECTIVE_CAMERA == 1', '	return perspectiveDepthToViewZ( depth, nearClip, farClip );', '	#else', '	return orthographicDepthToViewZ( depth, nearClip, farClip );', '	#endif', '}', 'void main() {', '	vec2 aspectcorrect = vec2( 1.0, aspect );', '	float viewZ = getViewZ( getDepth( vUv ) );', '	float factor = ( focus + viewZ );', // viewZ is <= 0, so this is a difference equation
+  '	vec2 dofblur = vec2 ( clamp( factor * aperture, -maxblur, maxblur ) );', '	vec2 dofblur9 = dofblur * 0.9;', '	vec2 dofblur7 = dofblur * 0.7;', '	vec2 dofblur4 = dofblur * 0.4;', '	vec4 col = vec4( 0.0 );', '	col += texture2D( tColor, vUv.xy );', '	col += texture2D( tColor, vUv.xy + ( vec2(  0.0,   0.4  ) * aspectcorrect ) * dofblur );', '	col += texture2D( tColor, vUv.xy + ( vec2(  0.15,  0.37 ) * aspectcorrect ) * dofblur );', '	col += texture2D( tColor, vUv.xy + ( vec2(  0.29,  0.29 ) * aspectcorrect ) * dofblur );', '	col += texture2D( tColor, vUv.xy + ( vec2( -0.37,  0.15 ) * aspectcorrect ) * dofblur );', '	col += texture2D( tColor, vUv.xy + ( vec2(  0.40,  0.0  ) * aspectcorrect ) * dofblur );', '	col += texture2D( tColor, vUv.xy + ( vec2(  0.37, -0.15 ) * aspectcorrect ) * dofblur );', '	col += texture2D( tColor, vUv.xy + ( vec2(  0.29, -0.29 ) * aspectcorrect ) * dofblur );', '	col += texture2D( tColor, vUv.xy + ( vec2( -0.15, -0.37 ) * aspectcorrect ) * dofblur );', '	col += texture2D( tColor, vUv.xy + ( vec2(  0.0,  -0.4  ) * aspectcorrect ) * dofblur );', '	col += texture2D( tColor, vUv.xy + ( vec2( -0.15,  0.37 ) * aspectcorrect ) * dofblur );', '	col += texture2D( tColor, vUv.xy + ( vec2( -0.29,  0.29 ) * aspectcorrect ) * dofblur );', '	col += texture2D( tColor, vUv.xy + ( vec2(  0.37,  0.15 ) * aspectcorrect ) * dofblur );', '	col += texture2D( tColor, vUv.xy + ( vec2( -0.4,   0.0  ) * aspectcorrect ) * dofblur );', '	col += texture2D( tColor, vUv.xy + ( vec2( -0.37, -0.15 ) * aspectcorrect ) * dofblur );', '	col += texture2D( tColor, vUv.xy + ( vec2( -0.29, -0.29 ) * aspectcorrect ) * dofblur );', '	col += texture2D( tColor, vUv.xy + ( vec2(  0.15, -0.37 ) * aspectcorrect ) * dofblur );', '	col += texture2D( tColor, vUv.xy + ( vec2(  0.15,  0.37 ) * aspectcorrect ) * dofblur9 );', '	col += texture2D( tColor, vUv.xy + ( vec2( -0.37,  0.15 ) * aspectcorrect ) * dofblur9 );', '	col += texture2D( tColor, vUv.xy + ( vec2(  0.37, -0.15 ) * aspectcorrect ) * dofblur9 );', '	col += texture2D( tColor, vUv.xy + ( vec2( -0.15, -0.37 ) * aspectcorrect ) * dofblur9 );', '	col += texture2D( tColor, vUv.xy + ( vec2( -0.15,  0.37 ) * aspectcorrect ) * dofblur9 );', '	col += texture2D( tColor, vUv.xy + ( vec2(  0.37,  0.15 ) * aspectcorrect ) * dofblur9 );', '	col += texture2D( tColor, vUv.xy + ( vec2( -0.37, -0.15 ) * aspectcorrect ) * dofblur9 );', '	col += texture2D( tColor, vUv.xy + ( vec2(  0.15, -0.37 ) * aspectcorrect ) * dofblur9 );', '	col += texture2D( tColor, vUv.xy + ( vec2(  0.29,  0.29 ) * aspectcorrect ) * dofblur7 );', '	col += texture2D( tColor, vUv.xy + ( vec2(  0.40,  0.0  ) * aspectcorrect ) * dofblur7 );', '	col += texture2D( tColor, vUv.xy + ( vec2(  0.29, -0.29 ) * aspectcorrect ) * dofblur7 );', '	col += texture2D( tColor, vUv.xy + ( vec2(  0.0,  -0.4  ) * aspectcorrect ) * dofblur7 );', '	col += texture2D( tColor, vUv.xy + ( vec2( -0.29,  0.29 ) * aspectcorrect ) * dofblur7 );', '	col += texture2D( tColor, vUv.xy + ( vec2( -0.4,   0.0  ) * aspectcorrect ) * dofblur7 );', '	col += texture2D( tColor, vUv.xy + ( vec2( -0.29, -0.29 ) * aspectcorrect ) * dofblur7 );', '	col += texture2D( tColor, vUv.xy + ( vec2(  0.0,   0.4  ) * aspectcorrect ) * dofblur7 );', '	col += texture2D( tColor, vUv.xy + ( vec2(  0.29,  0.29 ) * aspectcorrect ) * dofblur4 );', '	col += texture2D( tColor, vUv.xy + ( vec2(  0.4,   0.0  ) * aspectcorrect ) * dofblur4 );', '	col += texture2D( tColor, vUv.xy + ( vec2(  0.29, -0.29 ) * aspectcorrect ) * dofblur4 );', '	col += texture2D( tColor, vUv.xy + ( vec2(  0.0,  -0.4  ) * aspectcorrect ) * dofblur4 );', '	col += texture2D( tColor, vUv.xy + ( vec2( -0.29,  0.29 ) * aspectcorrect ) * dofblur4 );', '	col += texture2D( tColor, vUv.xy + ( vec2( -0.4,   0.0  ) * aspectcorrect ) * dofblur4 );', '	col += texture2D( tColor, vUv.xy + ( vec2( -0.29, -0.29 ) * aspectcorrect ) * dofblur4 );', '	col += texture2D( tColor, vUv.xy + ( vec2(  0.0,   0.4  ) * aspectcorrect ) * dofblur4 );', '	gl_FragColor = col / 41.0;', '	gl_FragColor.a = 1.0;', '}'].join('\n')
+};
+exports.BokehShader = BokehShader;
+
+},{}],143:[function(require,module,exports){
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.CopyShader = void 0;
+
+/**
+ * Full-screen textured quad shader
+ */
+var CopyShader = {
+  uniforms: {
+    'tDiffuse': {
+      value: null
+    },
+    'opacity': {
+      value: 1.0
+    }
+  },
+  vertexShader: ['varying vec2 vUv;', 'void main() {', '	vUv = uv;', '	gl_Position = projectionMatrix * modelViewMatrix * vec4( position, 1.0 );', '}'].join('\n'),
+  fragmentShader: ['uniform float opacity;', 'uniform sampler2D tDiffuse;', 'varying vec2 vUv;', 'void main() {', '	vec4 texel = texture2D( tDiffuse, vUv );', '	gl_FragColor = opacity * texel;', '}'].join('\n')
+};
+exports.CopyShader = CopyShader;
+
+},{}],144:[function(require,module,exports){
 // Copyright Joyent, Inc. and other Node contributors.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
@@ -14406,7 +15713,7 @@ Url.prototype.parseHost = function() {
   if (host) this.hostname = host;
 };
 
-},{"./util":110,"punycode":97,"querystring":100}],110:[function(require,module,exports){
+},{"./util":145,"punycode":124,"querystring":127}],145:[function(require,module,exports){
 'use strict';
 
 module.exports = {
@@ -14424,7 +15731,7 @@ module.exports = {
   }
 };
 
-},{}],111:[function(require,module,exports){
+},{}],146:[function(require,module,exports){
 "use strict";
 
 var _forEach = _interopRequireDefault(require("@babel/runtime-corejs3/core-js-stable/instance/for-each"));
@@ -14477,37 +15784,94 @@ function addEvents(target, events) {
   });
 }
 
-},{"@babel/runtime-corejs3/core-js-stable/array/is-array":1,"@babel/runtime-corejs3/core-js-stable/instance/for-each":3,"@babel/runtime-corejs3/core-js-stable/object/define-property":5}],112:[function(require,module,exports){
+},{"@babel/runtime-corejs3/core-js-stable/array/is-array":1,"@babel/runtime-corejs3/core-js-stable/instance/for-each":3,"@babel/runtime-corejs3/core-js-stable/object/define-property":6}],147:[function(require,module,exports){
 "use strict";
+
+var _startsWith = _interopRequireDefault(require("@babel/runtime-corejs3/core-js-stable/instance/starts-with"));
 
 var _assign = _interopRequireDefault(require("@babel/runtime-corejs3/core-js-stable/object/assign"));
 
 var _now = _interopRequireDefault(require("@babel/runtime-corejs3/core-js-stable/date/now"));
 
+var _getOwnPropertyDescriptor = _interopRequireDefault(require("@babel/runtime-corejs3/core-js-stable/object/get-own-property-descriptor"));
+
+var _defineProperty = _interopRequireDefault(require("@babel/runtime-corejs3/core-js-stable/object/define-property"));
+
+var _weakMap = _interopRequireDefault(require("@babel/runtime-corejs3/core-js-stable/weak-map"));
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+var THREE = _interopRequireWildcard(require("three/build/three.module.js"));
+
+var _DRACOLoader = require("three/examples/jsm/loaders/DRACOLoader.js");
+
+var _GLTFLoader = require("three/examples/jsm/loaders/GLTFLoader.js");
+
+var _OrbitControls = require("three/examples/jsm/controls/OrbitControls.js");
+
+var _FBXLoader = require("three/examples/jsm/loaders/FBXLoader.js");
+
+var _EffectComposer = require("three/examples/jsm/postprocessing/EffectComposer.js");
+
+var _RenderPass = require("three/examples/jsm/postprocessing/RenderPass.js");
+
+var _BokehPass = require("three/examples/jsm/postprocessing/BokehPass.js");
 
 var _eventUtils = require("./eventUtils.js");
 
-const THREE = require('three');
+function _getRequireWildcardCache() {
+  if (typeof _weakMap.default !== "function") return null;
+  var cache = new _weakMap.default();
 
-const NodeUrl = require('url'); // import { GLTFLoader } from 'three/examples/js/loaders/GLTFLoader.js';
+  _getRequireWildcardCache = function () {
+    return cache;
+  };
 
+  return cache;
+}
 
-const {
-  DRACOLoader
-} = require('three/examples/jsm/loaders/DRACOLoader.js');
+function _interopRequireWildcard(obj) {
+  if (obj && obj.__esModule) {
+    return obj;
+  }
 
-const {
-  GLTFLoader
-} = require('three/examples/jsm/loaders/GLTFLoader.js');
+  if (obj === null || typeof obj !== "object" && typeof obj !== "function") {
+    return {
+      default: obj
+    };
+  }
 
-const {
-  OrbitControls
-} = require('three/examples/jsm/controls/OrbitControls.js');
+  var cache = _getRequireWildcardCache();
 
-const {
-  FBXLoader
-} = require('three/examples/jsm/loaders/FBXLoader.js');
+  if (cache && cache.has(obj)) {
+    return cache.get(obj);
+  }
+
+  var newObj = {};
+  var hasPropertyDescriptor = _defineProperty.default && _getOwnPropertyDescriptor.default;
+
+  for (var key in obj) {
+    if (Object.prototype.hasOwnProperty.call(obj, key)) {
+      var desc = hasPropertyDescriptor ? (0, _getOwnPropertyDescriptor.default)(obj, key) : null;
+
+      if (desc && (desc.get || desc.set)) {
+        (0, _defineProperty.default)(newObj, key, desc);
+      } else {
+        newObj[key] = obj[key];
+      }
+    }
+  }
+
+  newObj.default = obj;
+
+  if (cache) {
+    cache.set(obj, newObj);
+  }
+
+  return newObj;
+}
+
+const NodeUrl = require('url');
 
 const EventEmitter = require('events');
 
@@ -14542,7 +15906,16 @@ class itisModelViewer extends EventEmitter {
     this.refreshFlag = false; //to prevent multi call of refresh in a frame
 
     this.raycaster = new THREE.Raycaster();
-    this.loaded = false; // this.frameCalls=[];
+    this.loaded = false;
+    this.postprocessing = {
+      composer: null,
+      renderPass: null,
+      bokehPass: null,
+      bokehOpts: {
+        aperture: 0.008,
+        maxblur: 0.005
+      }
+    };
   }
 
   get width() {
@@ -14583,7 +15956,10 @@ class itisModelViewer extends EventEmitter {
       gridHelper: false,
       wireframe: false,
       noAnimation: false,
-      shadow: false
+      shadow: false,
+      meshDebug: false,
+      bgColor: undefined,
+      defocus: false
     }, opts);
     console.log('options', opts);
     opts.width || (opts.width = opts.canvas?.width || 300);
@@ -14597,13 +15973,14 @@ class itisModelViewer extends EventEmitter {
 
     this.initControls();
     this.initDefaultScene();
+    if (opts.defocus) this.initComposer();
     if (opts.meshDebug) this.initMeshDebug();
   }
 
   objectsAt(x, y) {
     if (!this.loadedScene) return [];
     this.raycaster.setFromCamera(new THREE.Vector2(x / this.width * 2 - 1, 1 - y / this.height * 2), this.camera);
-    const intersects = this.raycaster.intersectObjects(this.scene.children, true);
+    const intersects = this.raycaster.intersectObjects(this.loadedScene.children, true);
     return intersects;
   }
 
@@ -14628,6 +16005,8 @@ class itisModelViewer extends EventEmitter {
   }
 
   initRenderer() {
+    var _context;
+
     const opts = this.opts;
     /* create a renderer */
 
@@ -14642,24 +16021,41 @@ class itisModelViewer extends EventEmitter {
     console.log('renderer options', rendererOpts);
     const renderer = this.renderer = new THREE.WebGLRenderer(rendererOpts);
     renderer.setSize(this.width, this.height);
-    if (rendererOpts.alpha === false) renderer.setClearColor(new THREE.Color("rgb(20,20,20,0)"));
-    renderer.setPixelRatio(devicePixelRatio);
+
+    if (typeof opts.bgColor === 'string' && (0, _startsWith.default)(_context = opts.bgColor).call(_context, '0x')) {
+      opts.bgColor = Number(opts.bgColor);
+    }
+
+    if (rendererOpts.alpha === false) renderer.setClearColor(new THREE.Color(opts.bgColor || "rgb(20,20,20,0)")); // renderer.setPixelRatio(devicePixelRatio);
+
     renderer.sortObjects = false;
+    renderer.toneMapping = THREE.ACESFilmicToneMapping;
+    renderer.toneMappingExposure = 1.3;
     renderer.physicallyCorrectLights = true;
     renderer.shadowMap.enabled = opts.shadow;
-    renderer.shadowMap.autoUpdate = opts.shadow;
-    /* this.on('beforeRefresh',e=>{
-    	renderer.shadowMap.needsUpdate=true;
-    }) */
-    // renderer.shadowMap.type=THREE.BasicShadowMap;
+    renderer.shadowMap.autoUpdate = opts.shadow; // renderer.shadowMap.type=THREE.BasicShadowMap;
     // renderer.shadowMap.type=THREE.PCFShadowMap;
 
     renderer.shadowMap.type = THREE.PCFSoftShadowMap; // renderer.shadowMap.type=THREE.VSMShadowMap;
-    // console.log(renderer.shadowMap)
 
     if (!opts.canvas) {
       opts.parent.appendChild(renderer.domElement);
     }
+  }
+
+  initComposer() {
+    let bOpts = this.postprocessing.bokehOpts;
+    const composer = this.postprocessing.composer = new _EffectComposer.EffectComposer(this.renderer),
+          rP = this.postprocessing.renderPass = new _RenderPass.RenderPass(this.scene, this.camera),
+          bP = this.postprocessing.bokehPass = new _BokehPass.BokehPass(this.scene, this.camera, {
+      focus: 1.0,
+      aperture: bOpts.aperture,
+      maxblur: bOpts.maxblur,
+      width: this.width,
+      height: this.height
+    });
+    composer.addPass(rP);
+    composer.addPass(bP);
   }
 
   initDefaultScene()
@@ -14730,8 +16126,8 @@ class itisModelViewer extends EventEmitter {
   initControls() {
     this._setMouseEvents();
 
-    const controls = this.controls = new OrbitControls(this.camera, this.renderer.domElement);
-    controls.dampingFactor = 0.02;
+    const controls = this.controls = new _OrbitControls.OrbitControls(this.camera, this.renderer.domElement);
+    controls.dampingFactor = 0.05;
     controls.enableDamping = true; // controls.enableZoom=false;
 
     controls.mouseButtons = {
@@ -14745,13 +16141,29 @@ class itisModelViewer extends EventEmitter {
       if (!this.animating) requestAnimationFrame(() => this.refresh(true));
       this.lastInteractive = (0, _now.default)();
     });
-    controls.addEventListener('start', e => {// if(!this.animating)
-      // requestAnimationFrame(()=>{viewer.refresh();});
-      // this.refresh();
+    controls.addEventListener('end', e => {
+      if (this.opts.defocus) {
+        this.updatebokehPass();
+      }
     });
     this.on('beforeRefresh', e => {
       controls.update();
     });
+  }
+
+  updatebokehPass(x = this.width / 2, y = this.height / 2) {
+    let list = this.objectsAt(x, y);
+    console.log(list[0]?.distance);
+
+    if (list.length) {
+      this.postprocessing.bokehPass.uniforms["focus"].value = list[0].distance;
+      this.postprocessing.bokehPass.uniforms["aperture"].value = this.postprocessing.bokehOpts.aperture;
+    } else {
+      this.postprocessing.bokehPass.uniforms["aperture"].value = this.camera.position.distanceTo(0, 0, 0);
+    }
+
+    this.lastInteractive = (0, _now.default)();
+    this.refresh();
   }
 
   initDefaultCamera() {
@@ -14792,11 +16204,25 @@ class itisModelViewer extends EventEmitter {
     }
 
     this.renderer.setSize(width, height, true);
+    this.postprocessing.composer.setSize(width, height);
     this.refresh();
   }
 
   _setMouseEvents() {
+    let movedAfterPress = false;
     (0, _eventUtils.addEvents)(this.renderer.domElement, {
+      'click': e => {
+        if (this.opts.defocus && !movedAfterPress) {
+          this.updatebokehPass(e.offsetX, e.offsetY);
+        }
+      },
+      'mousedown': e => {
+        movedAfterPress = false;
+      },
+      'mousemove': e => {
+        movedAfterPress = true;
+      },
+
       /* 'wheel':e=>{//scale
       	const S=this.scene;
       	let s=S.scale.x*(1-e.deltaY/1000);
@@ -14848,12 +16274,12 @@ class itisModelViewer extends EventEmitter {
     let loader;
 
     if (url.pathname.match(/.gl(b|tf)$/i)) {
-      loader = new GLTFLoader();
-      const dracoLoader = new DRACOLoader();
+      loader = new _GLTFLoader.GLTFLoader();
+      const dracoLoader = new _DRACOLoader.DRACOLoader();
       dracoLoader.setDecoderPath('../lib/draco/');
       loader.setDRACOLoader(dracoLoader);
     } else if (url.pathname.match(/.fbx$/i)) {
-      loader = new FBXLoader();
+      loader = new _FBXLoader.FBXLoader();
     } else {
       throw new Error('format not supported');
     }
@@ -14920,11 +16346,6 @@ class itisModelViewer extends EventEmitter {
     light.radius = 1.1;
     light.shadow.mapSize.width = 2048;
     light.shadow.mapSize.height = 2048;
-    /* light.shadow.camera.left = -20;
-    light.shadow.camera.right = 20;
-    light.shadow.camera.top = 20;
-    light.shadow.camera.bottom = -20; */
-
     light.shadow.camera.near = 0.1;
     light.shadow.camera.far = 200;
   }
@@ -14951,7 +16372,7 @@ class itisModelViewer extends EventEmitter {
       return target;
     } else if (target instanceof THREE.Object3D) {
       target.add(this.defaultCamera);
-      this.setCamera(this.defaultCamera); // this.currentCamera=this.defaultCamera;
+      this.setCamera(this.defaultCamera);
     }
   }
 
@@ -15083,8 +16504,12 @@ class itisModelViewer extends EventEmitter {
         action.play();
       }
 
-      this.scene.add(scene);
-      this.scene.add(this.defaultCamera);
+      this.scene.add(scene); // this.scene.add(this.defaultCamera);
+
+      if (opts.defocus) {
+        this.updatebokehPass();
+      }
+
       this.refresh();
       this.resetView();
     } else {
@@ -15139,9 +16564,18 @@ class itisModelViewer extends EventEmitter {
 
     this.refreshFlag = true;
     this.emit('beforeRefresh');
-    this.animationMixer && this.animationMixer.update(this.clock.getDelta());
+    let D = this.clock.getDelta();
+    this.animationMixer && this.animationMixer.update(D);
     this.controls.update();
-    if (this.scene && this.camera) this.renderer.render(this.scene, this.camera);
+
+    if (this.scene && this.camera) {
+      this.renderer.render(this.scene, this.camera);
+
+      if (this.opts.defocus) {
+        this.postprocessing.composer.render(D);
+      }
+    }
+
     this.emit('aftereRefresh');
 
     if (this.animating || callloop) {
@@ -15184,6 +16618,6 @@ class itisModelViewer extends EventEmitter {
 itisModelViewer.THREE = THREE;
 window.itisModelViewer = itisModelViewer;
 
-},{"./eventUtils.js":111,"@babel/runtime-corejs3/core-js-stable/date/now":2,"@babel/runtime-corejs3/core-js-stable/object/assign":4,"events":96,"three":101,"three/examples/jsm/controls/OrbitControls.js":102,"three/examples/jsm/loaders/DRACOLoader.js":106,"three/examples/jsm/loaders/FBXLoader.js":107,"three/examples/jsm/loaders/GLTFLoader.js":108,"url":109}]},{},[112])
+},{"./eventUtils.js":146,"@babel/runtime-corejs3/core-js-stable/date/now":2,"@babel/runtime-corejs3/core-js-stable/instance/starts-with":4,"@babel/runtime-corejs3/core-js-stable/object/assign":5,"@babel/runtime-corejs3/core-js-stable/object/define-property":6,"@babel/runtime-corejs3/core-js-stable/object/get-own-property-descriptor":7,"@babel/runtime-corejs3/core-js-stable/weak-map":8,"events":123,"three/build/three.module.js":128,"three/examples/jsm/controls/OrbitControls.js":129,"three/examples/jsm/loaders/DRACOLoader.js":133,"three/examples/jsm/loaders/FBXLoader.js":134,"three/examples/jsm/loaders/GLTFLoader.js":135,"three/examples/jsm/postprocessing/BokehPass.js":136,"three/examples/jsm/postprocessing/EffectComposer.js":137,"three/examples/jsm/postprocessing/RenderPass.js":140,"url":144}]},{},[147])
 
 //# sourceMappingURL=itisModelViewer.js.map

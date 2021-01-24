@@ -1,10 +1,12 @@
-const THREE=require('three');
+import * as THREE from 'three/build/three.module.js';
 const NodeUrl = require('url');
-// import { GLTFLoader } from 'three/examples/js/loaders/GLTFLoader.js';
-const { DRACOLoader }=require('three/examples/jsm/loaders/DRACOLoader.js');
-const { GLTFLoader }=require('three/examples/jsm/loaders/GLTFLoader.js');
-const { OrbitControls }=require('three/examples/jsm/controls/OrbitControls.js');
-const { FBXLoader } =require('three/examples/jsm/loaders/FBXLoader.js');
+import { DRACOLoader } from 'three/examples/jsm/loaders/DRACOLoader.js';
+import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
+import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
+import { FBXLoader }  from 'three/examples/jsm/loaders/FBXLoader.js';
+import { EffectComposer } from 'three/examples/jsm/postprocessing/EffectComposer.js';
+import { RenderPass } from 'three/examples/jsm/postprocessing/RenderPass.js';
+import { BokehPass } from 'three/examples/jsm/postprocessing/BokehPass.js';
 
 import {addEvents} from './eventUtils.js';
 const EventEmitter = require('events');
@@ -30,7 +32,15 @@ class itisModelViewer extends EventEmitter{
 		this.refreshFlag=false;//to prevent multi call of refresh in a frame
 		this.raycaster = new THREE.Raycaster();
 		this.loaded=false;
-		// this.frameCalls=[];
+		this.postprocessing={
+			composer:null,
+			renderPass:null,
+			bokehPass:null,
+			bokehOpts:{
+				aperture: 0.008,
+				maxblur: 0.005,
+			},
+		};
 	}
 	get width(){return this.opts.width;}
 	// set width(v){this.opts.width=v;}
@@ -53,6 +63,9 @@ class itisModelViewer extends EventEmitter{
 			wireframe:false,
 			noAnimation:false,
 			shadow:false,
+			meshDebug:false,
+			bgColor:undefined,
+			defocus:false,
 		},opts);
 		console.log('options',opts);
 		opts.width||(opts.width=opts.canvas?.width||300);
@@ -65,6 +78,7 @@ class itisModelViewer extends EventEmitter{
 		}
 		this.initControls();
 		this.initDefaultScene();
+		if(opts.defocus)this.initComposer();
 		if(opts.meshDebug)this.initMeshDebug();
 	}
 	objectsAt(x,y){
@@ -73,7 +87,7 @@ class itisModelViewer extends EventEmitter{
 			( x / this.width) * 2 - 1,
 			1-( y / this.height) * 2,
 		), this.camera );
-		const intersects = this.raycaster.intersectObjects( this.scene.children,true );
+		const intersects = this.raycaster.intersectObjects( this.loadedScene.children,true );
 		return intersects;
 	}
 	initMeshDebug(){
@@ -107,25 +121,41 @@ class itisModelViewer extends EventEmitter{
 
 		const renderer=this.renderer = new THREE.WebGLRenderer(rendererOpts);
 		renderer.setSize(this.width,this.height);
+		if(typeof opts.bgColor==='string'&& opts.bgColor.startsWith('0x')){
+			opts.bgColor=Number(opts.bgColor);
+		}
 		if(rendererOpts.alpha===false)
-			renderer.setClearColor(new THREE.Color( "rgb(20,20,20,0)"));
-		renderer.setPixelRatio(devicePixelRatio);
+			renderer.setClearColor(new THREE.Color( opts.bgColor||"rgb(20,20,20,0)"));
+		// renderer.setPixelRatio(devicePixelRatio);
 		renderer.sortObjects=false;
+		renderer.toneMapping=THREE.ACESFilmicToneMapping;
+		renderer.toneMappingExposure=1.3;
 		renderer.physicallyCorrectLights=true;
 		renderer.shadowMap.enabled=opts.shadow;
 		renderer.shadowMap.autoUpdate=opts.shadow;
-		/* this.on('beforeRefresh',e=>{
-			renderer.shadowMap.needsUpdate=true;
-		}) */
 		// renderer.shadowMap.type=THREE.BasicShadowMap;
 		// renderer.shadowMap.type=THREE.PCFShadowMap;
 		renderer.shadowMap.type=THREE.PCFSoftShadowMap;
 		// renderer.shadowMap.type=THREE.VSMShadowMap;
-		// console.log(renderer.shadowMap)
 
+		
 		if(!opts.canvas){
 			opts.parent.appendChild(renderer.domElement);
 		}
+	}
+	initComposer(){
+		let bOpts=this.postprocessing.bokehOpts;
+		const composer=this.postprocessing.composer=new EffectComposer(this.renderer),
+		rP=this.postprocessing.renderPass=new RenderPass(this.scene,this.camera),
+		bP=this.postprocessing.bokehPass=new BokehPass(this.scene,this.camera, {
+			focus: 1.0,
+			aperture: bOpts.aperture,
+			maxblur: bOpts.maxblur,
+			width: this.width,
+			height:this.height,
+		} );
+		composer.addPass(rP);
+		composer.addPass(bP);
 	}
 	initDefaultScene(/* createDefaultObject=true */){
 		const opts=this.opts;
@@ -181,7 +211,7 @@ class itisModelViewer extends EventEmitter{
 	initControls(){
 		this._setMouseEvents();
 		const controls =this.controls= new OrbitControls(this.camera, this.renderer.domElement );
-		controls.dampingFactor=0.02;
+		controls.dampingFactor=0.05;
 		controls.enableDamping=true;
 		// controls.enableZoom=false;
 		controls.mouseButtons = {
@@ -196,14 +226,25 @@ class itisModelViewer extends EventEmitter{
 				requestAnimationFrame(()=>this.refresh(true));
 			this.lastInteractive=Date.now();
 		});
-		controls.addEventListener('start',e=>{
-			// if(!this.animating)
-			// requestAnimationFrame(()=>{viewer.refresh();});
-			// this.refresh();
+		controls.addEventListener('end',e=>{
+			if(this.opts.defocus){
+				this.updatebokehPass();
+			}
 		});
 		this.on('beforeRefresh',e=>{
 			controls.update();
 		});
+	}
+	updatebokehPass(x=this.width/2,y=this.height/2){
+		let list=this.objectsAt(x,y);
+		if(list.length){
+			this.postprocessing.bokehPass.uniforms[ "focus" ].value=list[0].distance;
+			this.postprocessing.bokehPass.uniforms[ "aperture" ].value=this.postprocessing.bokehOpts.aperture;
+		}else{
+			this.postprocessing.bokehPass.uniforms[ "aperture" ].value=this.camera.position.distanceTo(0,0,0);
+		}
+		this.lastInteractive=Date.now();
+		this.refresh();
 	}
 	initDefaultCamera(){
 		/* create a default camera */
@@ -234,10 +275,23 @@ class itisModelViewer extends EventEmitter{
 			this.camera.updateProjectionMatrix();
 		}
 		this.renderer.setSize(width,height,true);
+		this.postprocessing.composer.setSize(width,height);
 		this.refresh();
 	}
 	_setMouseEvents(){
+		let movedAfterPress=false;
 		addEvents(this.renderer.domElement,{
+			'click':e=>{
+				if(this.opts.defocus&&!movedAfterPress){
+					this.updatebokehPass(e.offsetX,e.offsetY);
+				}
+			},
+			'mousedown':e=>{
+				movedAfterPress=false;
+			},
+			'mousemove':e=>{
+				movedAfterPress=true;
+			},
 			/* 'wheel':e=>{//scale
 				const S=this.scene;
 				let s=S.scale.x*(1-e.deltaY/1000);
@@ -342,10 +396,6 @@ class itisModelViewer extends EventEmitter{
 		light.radius=1.1;
 		light.shadow.mapSize.width = 2048;
 		light.shadow.mapSize.height = 2048;
-		/* light.shadow.camera.left = -20;
-		light.shadow.camera.right = 20;
-		light.shadow.camera.top = 20;
-		light.shadow.camera.bottom = -20; */
 		light.shadow.camera.near = 0.1;
 		light.shadow.camera.far = 200;
 	}
@@ -370,7 +420,6 @@ class itisModelViewer extends EventEmitter{
 		}else if(target instanceof THREE.Object3D){
 			target.add(this.defaultCamera);
 			this.setCamera(this.defaultCamera);
-			// this.currentCamera=this.defaultCamera;
 		}
 	}
 	setScene(scene){
@@ -485,7 +534,10 @@ class itisModelViewer extends EventEmitter{
 				action.play();
 			}
 			this.scene.add(scene);
-			this.scene.add(this.defaultCamera);
+			// this.scene.add(this.defaultCamera);
+			if(opts.defocus){
+				this.updatebokehPass();
+			}
 			this.refresh();
 			this.resetView();
 		}else{
@@ -534,10 +586,15 @@ class itisModelViewer extends EventEmitter{
 		requestAnimationFrame(()=>this.refreshFlag=false);//reset the refresh flag
 		this.refreshFlag=true;
 		this.emit('beforeRefresh');
-		this.animationMixer&&this.animationMixer.update(this.clock.getDelta());
+		let D=this.clock.getDelta();
+		this.animationMixer&&this.animationMixer.update(D);
 		this.controls.update();
-		if(this.scene&&this.camera)
+		if(this.scene&&this.camera){
 			this.renderer.render(this.scene,this.camera);
+			if(this.opts.defocus){
+				this.postprocessing.composer.render(D);
+			}
+		}
 		this.emit('aftereRefresh');
 		if(this.animating||callloop){requestAnimationFrame(()=>this.refresh());}
 	}
