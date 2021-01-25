@@ -127,7 +127,6 @@ class itisModelViewer extends EventEmitter{
 		}
 		if(rendererOpts.alpha===false)
 			renderer.setClearColor(new THREE.Color( opts.bgColor||"rgb(20,20,20,0)"));
-		// renderer.setPixelRatio(devicePixelRatio);
 		renderer.sortObjects=false;
 		renderer.toneMapping=THREE.ACESFilmicToneMapping;
 		renderer.toneMappingExposure=1.3;
@@ -593,8 +592,12 @@ class itisModelViewer extends EventEmitter{
 		this.animationMixer&&this.animationMixer.update(D);
 		this.controls.update();
 		if(this.scene&&this.camera){
+			let P=this.animating?1:devicePixelRatio*2;//set a lower pixel ratio while animating
+			console.log('P',P)
+			this.renderer.setPixelRatio(P);
 			this.renderer.render(this.scene,this.camera);
 			if(this.opts.defocus){
+				this.postprocessing.composer.renderer.setPixelRatio(P);
 				this.postprocessing.composer.render(D);
 			}
 		}
