@@ -87,13 +87,14 @@ fullFillCanvas();
 /* ====events==== */
 //update camera position in url hash
 let camposUpdated=false;
-viewer.on('afterLastFrame',()=>{
+viewer.controls.addEventListener('end',()=>{
 	if(camposUpdated)return;//still animating
 	camposUpdated=true;
 	let pos=viewer.camera.position,target=viewer.controls.target;
 	let campos=`${pos.x},${pos.y},${pos.z},${target.x},${target.y},${target.z}`.replace(/\d+/g,t=>Number(t).toString(36));//convert evert int part to base32
 	pageArgs.set('campos',campos,true);
-}).controls.addEventListener('change',e=>camposUpdated=false);
+});
+viewer.controls.addEventListener('change',e=>camposUpdated=false);
 
 /* ====utils==== */
 //convert bytes to human readable format
