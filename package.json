@@ -1,6 +1,6 @@
 {
   "name": "itismodelviewer",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "webgl 3d viewer",
   "main": "index.js",
   "scripts": {
