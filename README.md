@@ -26,7 +26,7 @@ All names and values will be  URI decoded, so if there are some special signs in
 
 ### Example
 
-https://jiajiajiang.github.io/itisModelViewer/viewer/#url=%2F%2Fio.luojia.me%2Fmodel%2F2021%2F0120%2FIRCameraShell.glb&gridHelper&meshDebug&campos=0%2C0.dobiqwe987c%2C5%2C0%2C0%2C0
+https://jiajiajiang.github.io/itisModelViewer/viewer/#url=%2F%2Fio.luojia.me%2Fmodel%2F2021%2F0120%2FIRCameraShell.glb&gridHelper&meshDebug&campos=-1.2eao01gol6y%2C1.15w7zgww1yy%2C1.ygqpqruzf9%2C-0.cuylbsfvj1%2C-0.cr4do7btrm%2C-0.9fk4eco1w7s
 
 This URL turns on `gridHelper` and `meshDebug`, and set camera to a position.
 
