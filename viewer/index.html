@@ -2,6 +2,7 @@
 	<head>
 		<meta charset="utf-8">
 		<title>itisModelViewer</title>
+		<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
 		<script src="../dist/itisModelViewer.js?0.9"></script>
 		<style>
 			body{
@@ -11,7 +12,7 @@
 		
 			}
 			#loading_dom{
-				position: fixed;
+				position: absolute;
 				left:0;
 				top:0;
 				width:100%;
@@ -29,12 +30,15 @@
 				font-size: 2.1vh;
 			}
 			canvas{
-				position: fixed;
+				position: absolute;
 				left:0;
 				top:0;
 				width:100%;
 				height: 100%;
 				z-index: 1;
+			}
+			.dg.ac{
+				z-index: 2!important;
 			}
 		</style>
 	</head>
@@ -42,7 +46,7 @@
 		<div id="controller_dom">
 		</div>
 		<div id="loading_dom">
-			<span id="progress_dom"></span>
+			<span id="progress_dom">Loading<br></span>
 		</div>
 		<script src="./viewer.js?0.9"></script>
 	</body>

@@ -27,4 +27,14 @@ function addEvents(target,events){
 	});
 }
 
-export {enableMouseDrag,addEvents};
+function assignOptions(to,from,...ext){
+	for(let n in from){
+		if(from[n]===undefined)continue;
+		to[n]=from[n];
+	}
+	if(ext.length){
+		assignOptions(to,...ext);
+	}
+	return to;
+}
+export {enableMouseDrag,addEvents,assignOptions};
