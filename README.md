@@ -10,7 +10,7 @@ All names and values will be  URI decoded, so if there are some special signs in
 
 ### Options
 
-* url : The URLof the model file, supports `gltf`,`glb`,`fbx` files. If not set, a cube will keep rotating and  you can change the default view.
+* url : The URL of the model file, supports `gltf`,`glb`,`fbx` files. If not set, a cube will keep rotating and  you can change the default view.
 * alpha : (Switch) Make the background transparent.
 * antialiasOff : (Switch) Turn off antialias.
 * bgColor : (Switch) Set a background color. If `alpha` exists, this option will not take effect
