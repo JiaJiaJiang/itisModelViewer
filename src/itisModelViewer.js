@@ -173,9 +173,10 @@ class itisModelViewer extends EventEmitter{
 		}).on('fileLoaded',()=>{
 			setTimeout(()=>{
 				if(this.opts.defocus){
+					this.lastInteractive=Date.now();
 					this.updateFocus();
 				}
-			},100);
+			},200);
 		});
 		if(this.controls){
 			this.controls.addEventListener('change',e=>{
@@ -285,7 +286,7 @@ class itisModelViewer extends EventEmitter{
 	}
 	initDefaultCamera(){
 		/* create a default camera */
-		const camera=this.defaultCamera = new THREE.PerspectiveCamera( 90,this.width / this.height, 0.001, 1000 );
+		const camera=this.defaultCamera = new THREE.PerspectiveCamera( 45,this.width / this.height, 0.001, 1000 );
 		camera.far=100000;
 		camera.position.set(0,0.5,5);
 		this.on('fileLoaded',()=>{

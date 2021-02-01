@@ -17448,9 +17448,11 @@ var itisModelViewer = /*#__PURE__*/function (_EventEmitter) {
       }).on('fileLoaded', function () {
         setTimeout(function () {
           if (_this3.opts.defocus) {
+            _this3.lastInteractive = Date.now();
+
             _this3.updateFocus();
           }
-        }, 100);
+        }, 200);
       });
 
       if (this.controls) {
@@ -17603,7 +17605,7 @@ var itisModelViewer = /*#__PURE__*/function (_EventEmitter) {
       var _this7 = this;
 
       /* create a default camera */
-      var camera = this.defaultCamera = new THREE.PerspectiveCamera(90, this.width / this.height, 0.001, 1000);
+      var camera = this.defaultCamera = new THREE.PerspectiveCamera(45, this.width / this.height, 0.001, 1000);
       camera.far = 100000;
       camera.position.set(0, 0.5, 5);
       this.on('fileLoaded', function () {

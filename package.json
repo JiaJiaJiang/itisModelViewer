@@ -5,7 +5,8 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "minify": "uglifyjs dist/itisModelViewer.js --compress --mangle -o dist/itisModelViewer.min.js"
+    "minify": "uglifyjs dist/itisModelViewer.js --compress --mangle -o dist/itisModelViewer.min.js",
+    "build": "gulp js && npm run minify"
   },
   "repository": {
     "type": "git",
