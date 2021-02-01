@@ -87,14 +87,16 @@ fullFillCanvas();
 /* ====events==== */
 //update camera position in url hash
 let camposUpdated=false;
-viewer.controls.addEventListener('end',()=>{
-	if(camposUpdated)return;//still animating
-	camposUpdated=true;
-	let pos=viewer.camera.position,target=viewer.controls.target;
-	let campos=`${pos.x},${pos.y},${pos.z},${target.x},${target.y},${target.z}`.replace(/\d+/g,t=>Number(t).toString(36));//convert evert int part to base32
-	pageArgs.set('campos',campos,true);
+viewer.once('fileLoaded',()=>{
+	viewer.on('afterRefresh',()=>{
+		if(viewer.animating||camposUpdated)return;//still animating
+		camposUpdated=true;
+		let pos=viewer.camera.position,target=viewer.controls.target;
+		let campos=`${pos.x},${pos.y},${pos.z},${target.x},${target.y},${target.z}`.replace(/\d+/g,t=>Number(t).toString(36));//convert evert int part to base32
+		pageArgs.set('campos',campos,true);
+	});
+	viewer.controls.addEventListener('end',e=>camposUpdated=false);
 });
-viewer.controls.addEventListener('change',e=>camposUpdated=false);
 
 /* ====utils==== */
 //convert bytes to human readable format

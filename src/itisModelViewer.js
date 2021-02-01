@@ -1,6 +1,6 @@
-/* 
+/*
 itisModelViewer
-copyright luojia@luojia.me
+Copyright luojia@luojia.me
 */
 //defocus part was from this example:https://github.com/mrdoob/three.js/blob/master/examples/webgl_postprocessing_dof2.html
 import * as THREE from 'three/build/three.module.js';
@@ -25,7 +25,7 @@ class itisModelViewer extends EventEmitter{
 		this.animationMixer=null;
 		this.defaultCamera=null;//for view of scene's transform
 		this.defaultScene=null;//loaded when no url specified
-		this.defaultLights=[];
+		this.defaultLights=new THREE.Scene();
 		this.loadedScene=null;//loaded scene from fils
 		this.currentCamera=null;//current using camera
 		this.controls=null;
@@ -33,7 +33,7 @@ class itisModelViewer extends EventEmitter{
 		this._maxDistanceToCenter=0;
 		this._center=THREE.Vector3;
 		this.lastInteractive=0;
-		this.animatingTime=200;
+		this.animatingTime=300;
 		this.boundingBox={min:new THREE.Vector3,max:new THREE.Vector3};
 		this.refreshFlag=false;//to prevent multi call of refresh in a frame
 		this.raycaster = new THREE.Raycaster();
@@ -44,7 +44,7 @@ class itisModelViewer extends EventEmitter{
 			renderPass:null,
 			bokehPass:null,
 			bokehOpts:{
-				aperture: 0.01,
+				aperture: 0.003,
 				maxblur: 0.008,
 			},
 		};
@@ -55,7 +55,8 @@ class itisModelViewer extends EventEmitter{
 	get canvasHeight(){return this.renderer.domElement.height;}
 	get camera(){return this.currentCamera;}
 	get scene(){return this.defaultScene;}
-	get animating(){return (Date.now()-this.lastInteractive<this.animatingTime)||(this.animationMixer?.timeScale&&this.loadedScene.actions?.length!==0);}
+	get animating(){return Date.now()-this.lastInteractive<this.animatingTime;}
+	get needRefresh(){return this.animating||(this.animationMixer?.timeScale&&this.loadedScene.actions?.length!==0);}
 	constructor(url,opts){
 		super();
 		this._vars();
@@ -214,13 +215,12 @@ class itisModelViewer extends EventEmitter{
 		/* create a light */
 		const lightA = new THREE.AmbientLight( 0x404040 ); // soft white light
 		lightA.intensity=8;
-		this.scene.add(lightA);
-		this.defaultLights.push(lightA);
+		this.defaultLights.add(lightA);
 		const lightD = new THREE.DirectionalLight( 0xffffff, 1 );
 		this._modifyLightShadow(lightD);
 		lightD.position.set(10,10,10);
-		scene.add(lightD);
-		this.defaultLights.push(lightD);
+		this.defaultLights.add(lightD);
+		this.scene.add(this.defaultLights);
 
 		/* create a cube */
 		const cube = new THREE.Mesh( new THREE.BoxGeometry(), new THREE.MeshPhongMaterial( { color: 0x66ccff } ) );
@@ -256,10 +256,12 @@ class itisModelViewer extends EventEmitter{
 			// RIGHT: THREE.MOUSE.RIGHT,
 		};
 		controls.zoomSpeed=0.4;
-		controls.target.set(...(this.opts.cameraPos.slice(3)));
-		controls.saveState();
+		this.on('fileLoaded',()=>{
+			controls.target.set(...(this.opts.cameraPos.slice(3)));
+			controls.saveState();
+		});
 		controls.addEventListener('change',e=>{
-			if(!this.animating)
+			if(!this.needRefresh)
 				requestAnimationFrame(()=>this.refresh());
 			this.controlChanged=true;
 			this.lastInteractive=Date.now();
@@ -283,13 +285,14 @@ class itisModelViewer extends EventEmitter{
 	}
 	initDefaultCamera(){
 		/* create a default camera */
-		const camera=this.defaultCamera = new THREE.PerspectiveCamera( 75,this.width / this.height, 0.001, 1000 );
+		const camera=this.defaultCamera = new THREE.PerspectiveCamera( 90,this.width / this.height, 0.001, 1000 );
 		camera.far=100000;
-		camera.position.set(...(this.opts.cameraPos.slice(0,3)));
+		camera.position.set(0,0.5,5);
+		this.on('fileLoaded',()=>{
+			camera.position.set(...(this.opts.cameraPos.slice(0,3)));
+		});
 		this.currentCamera=this.defaultCamera;
 		this.setCamera(this.defaultCamera);
-		camera.updateProjectionMatrix();
-		camera.updateMatrix();
 	}
 	initAnimationMixer(scene){
 		const opts=this.opts,A=this.animationMixer;
@@ -491,9 +494,8 @@ class itisModelViewer extends EventEmitter{
 				checkBoundingPoint(max.x,max.y,max.z,sceneMin,sceneMax);
 			}
 		});
-		for(let l of this.defaultLights){//show default lights if there is no light in the scene
-			l.visible=!hasLight;
-		}
+		this.defaultLights.visible=!hasLight;//show default lights if there is no light in the scene
+
 		let points=[sceneMin,sceneMax];
 		let center=this._center=itisModelViewer.calcCenter(points);
 		// console.debug('center',center)
@@ -586,22 +588,22 @@ class itisModelViewer extends EventEmitter{
 		}
 		const clockDelta=this.clock.getDelta();
 		this.emit('beforeRefresh',clockDelta);
-		if(!this.animating)this.emit('beforeLastFrame');
+		if(!this.needRefresh)this.emit('beforeLastFrame');
 		const scene=this.scene,camera=this.camera,PP=this.postprocessing;
 		if(scene&&camera){
-			let P=this.animating?1:devicePixelRatio*2;//set a lower pixel ratio while animating
+			let P=this.needRefresh?1:devicePixelRatio*2;//set a lower pixel ratio while animating
 			if(this.opts.highQuality&&P===1)P=2;
 			let oldP=this.renderer.getPixelRatio();
 			if(oldP!==P)this.renderer.setPixelRatio(P);
 			this.renderer.render(scene,camera);
 			if(this.opts.defocus){
-				if(oldP!==P)PP.composer.setPixelRatio(P*2);
+				if(oldP!==P)PP.composer.setPixelRatio(P);
 				PP.composer.render(clockDelta);
 			}
 		}
-		this.emit('afterRefresh',this.animating);
-		if(!this.animating)this.emit('afterLastFrame');
-		if(this.animating)requestAnimationFrame(()=>{this.refresh()});
+		this.emit('afterRefresh');
+		if(!this.needRefresh)this.emit('afterLastFrame');
+		if(this.needRefresh)requestAnimationFrame(()=>{this.refresh()});
 	}
 	/* nextFrame(cb){
 		if(this.frameCalls.length===0)

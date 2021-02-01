@@ -4,7 +4,8 @@
   "description": "webgl 3d viewer",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "minify": "uglifyjs dist/itisModelViewer.js --compress --mangle -o dist/itisModelViewer.min.js"
   },
   "repository": {
     "type": "git",
@@ -36,6 +37,7 @@
     "gulp-sourcemaps": "^3.0.0",
     "regenerator-runtime": "^0.13.7",
     "three": "^0.124.0",
+    "uglify-es": "github:mishoo/UglifyJS2#harmony",
     "vinyl-buffer": "^1.0.1",
     "vinyl-source-stream": "^2.0.0"
   }

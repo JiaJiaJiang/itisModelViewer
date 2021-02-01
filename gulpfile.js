@@ -37,8 +37,7 @@ function transjs(name,cover=90){
 		plugin: [
 			[ require('esmify') ],
 		]
-	})
-	.transform(
+	}).transform(
 		"babelify",{ 
 			presets: [
 				[
@@ -51,10 +50,11 @@ function transjs(name,cover=90){
 						"corejs":3,
 					},
 				],
+				// ["minify",{}],
 			],
 			plugins:[
 				"@babel/plugin-proposal-export-default-from",
-				[
+				/* [
 					"@babel/plugin-transform-runtime",
 					{
 					  "absoluteRuntime": false,
@@ -63,16 +63,14 @@ function transjs(name,cover=90){
 					  "regenerator": true,
 					  "useESModules": false,
 					}
-				],
+				], */
 				'@babel/plugin-proposal-class-properties',
 				//以下为cover依赖，不要从package.json里删除
 				// "@babel/plugin-transform-modules-commonjs",
 				// "regenerator-runtime",
 			]
 		}
-	)/* .transform(
-		'tinyify', { global: true }
-	) */
+	)
 	.bundle()
 	.pipe(source(`./${name}`))
 	// .pipe(rename({extname:`.${cover}.js`}))
@@ -82,7 +80,7 @@ function transjs(name,cover=90){
 	.pipe(gulp.dest(dist));
 }
 gulp.task('js',function(){
-	return transjs('itisModelViewer.js',50);
+	return transjs('itisModelViewer.js',90);
 });
 
 gulp.task('clean',async function(){
